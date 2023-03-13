@@ -8,6 +8,20 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/pins')
+def pinweb():
+    list= '<ul>'
+    for i in range(1,5):
+        list = list + '<li>Elemento ' + str(i) + '</li>'
+    list = list + '</ul>'
+    #list = '<h1>Pene</h1>'
+    templateData = {
+        'lista' : list
+        }
+    #return render_template('pines.html', **templateData)
+    return list
+    
+
 @app.route('/<pin>/<action>')
 def pinset(pin, action):
     pin = int(pin)
