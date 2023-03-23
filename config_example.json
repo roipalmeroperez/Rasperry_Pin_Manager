@@ -1,3 +1,6 @@
 {
-	"PIN_WEB_NAME": "pinWeb_es.py"
+	"DATABASE_HOST": "host",
+	"DATABASE_USER": "user",
+	"DATABASE_PASSWORD": "password",
+	"HISTORIC_DAO_NAME": "daoName"
 }

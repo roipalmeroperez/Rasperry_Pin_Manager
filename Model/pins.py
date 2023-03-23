@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import json
 
-pin_conf_file = open('pin_config.json')
+pin_conf_file = open('./Model/pin_config.json')
 pin_conf = json.loads(pin_conf_file.read())
 
 class NotAllowedPinException(Exception):
@@ -32,8 +32,12 @@ def on(pin):
 def off(pin):
     GPIO.output(pin, GPIO.LOW)
 
+
+
 if __name__ == '__main__':
     # Tests
+    pin_conf_file = open('pin_config.json')
+    pin_conf = json.loads(pin_conf_file.read())
     init()
     #raise NotAllowedPinException
     #setOut('25')
