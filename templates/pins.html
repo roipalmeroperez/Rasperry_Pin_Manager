@@ -5,8 +5,27 @@
    <link rel="stylesheet" href="../static/style.css">
 </head>
 
+.modeInput{
+    <select>
+       <option></option>
+       <option>Input</option>
+       <option>Output</option>
+   </select>
+}
+
 <body>
    <h1>Pins</h1>
+   <label for="cars">Choose a car:</label>
+<select name="cars" id="cars">
+  <optgroup label="Swedish Cars">
+    <option value="volvo">Volvo</option>
+    <option value="saab">Saab</option>
+  </optgroup>
+  <optgroup label="German Cars">
+    <option value="mercedes">Mercedes</option>
+    <option value="audi">Audi</option>
+  </optgroup>
+</select>
    <table>
        <tr>
            <th>Pin</th><th>Mode</th><th>Value</th>
@@ -15,7 +34,7 @@
            <td>1</td><td><button>On</button></td><td><button disabled>Off</button></td>
        </tr>
        <tr>
-           <td>2</td><td>Out</td><td>Off</td>
+           <td>2</td><td> <div class="modeInput">a</div></td><td>Off</td>
        </tr>
        <tr>
            <td>3</td><td>Out</td><td>Off</td>
