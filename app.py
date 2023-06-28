@@ -1,8 +1,9 @@
 import Model.pins as pins
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, request
 
 
 app = Flask(__name__)
+rules = {}
 
 @app.route('/')
 def index():
@@ -18,27 +19,14 @@ def errorWeb():
 
 @app.route('/pins')
 def pinweb():
-    list= '<ul>'
-    for i in range(1,5):
-        list = list + '<li>Elemento ' + str(i) + '</li>'
-    list = list + '</ul>'
-    #list = '<h1>Hola</h1>'
-    templateData = {
-        'lista' : list
-        }
-    #return render_template('pines.html', **templateData)
-    #return list
-    return render_template('pins.html')
+    
+    templateData = pins.pinList
+    return render_template('pins.html', pinData = pins.pinList)
     
 
-@app.route('/<pin>/<action>')
+@app.route('/pins/<pin>/<action>')
 def pinset(pin, action):
-    pin = int(pin)
-    if ((pin < 1) or (pin > 40)):
-        print('Pin out of range')
-    #elif not(pins.allowedPins[pin-1]):
-    #    print('Not allowed pin')
-    elif action == 'out':
+    if action == 'out':
         pins.setOut(pin)
     elif action == 'in':
         pins.setIn(pin)
@@ -46,14 +34,24 @@ def pinset(pin, action):
         pins.on(pin)
     elif action == 'off':
         pins.off(pin)
+    elif action == 'clear':
+        pins.clear(pin)
     else:
         print('Pin: ' + str(pin) + ', action: ' + action)
         
-    
-    return render_template('index.html')
+    templateData = pins.pinList
+    return render_template('pins.html', pinData = pins.pinList)
         
-
+@app.route('/rules', methods = ['POST', 'GET'])
+def rulesWeb():
+    if request.method == 'POST':
+        rules[len(rules)] = {
+            'name': request.form['name'],
+            'password': request.form['password']
+            }
+    
+    return render_template('rules.html', rulesData = rules)
 
 if __name__ == '__main__':
     pins.init()
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8080)    

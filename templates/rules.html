@@ -1,0 +1,31 @@
+<html>
+   <body>
+      <form action = "http://localhost:8080/rules" method = "post">
+         <table>
+            <tr>
+               <td>Enter Name:</td>
+               <td>Enter Password:</td>
+            </tr>
+            <tr>
+               <td><input type = "text" name = "name" /></td>
+               <td><input type = "text" name = "password" /></td>
+            </tr>
+            <tr>
+               <td><input type = "submit" /></td>
+            </tr>
+         </table>
+      </form>
+      <table>
+      <tr>
+         <th>Number</th><th>Name</th><th>Password</th>
+      </tr>
+      {% for key, value in rulesData.items() %}
+         <tr> 
+            <td>{{ key }}</td>
+            <td>{{ value.name }}</td>
+            <td>{{ value.password }}</td>
+         </tr>
+      {% endfor %}
+   </table>
+   </body>
+</html>
