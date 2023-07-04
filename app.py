@@ -1,4 +1,4 @@
-import Model.pins as pins
+import pins as pins
 from flask import Flask, render_template, abort, request
 
 
@@ -20,8 +20,7 @@ def errorWeb():
 @app.route('/pins')
 def pinweb():
     
-    templateData = pins.pinList
-    return render_template('pins.html', pinData = pins.pinList)
+    return render_template('pins.html', pinData = pins.getPins())
     
 
 @app.route('/pins/<pin>/<action>')
@@ -40,7 +39,7 @@ def pinset(pin, action):
         print('Pin: ' + str(pin) + ', action: ' + action)
         
     templateData = pins.pinList
-    return render_template('pins.html', pinData = pins.pinList)
+    return render_template('pins.html', pinData = pins.getPins())
         
 @app.route('/rules', methods = ['POST', 'GET'])
 def rulesWeb():

@@ -1,6 +1,14 @@
 import RPi.GPIO as GPIO
 import json
 
+pinList = {}
+pin_conf_file = open('./pin_config.json')
+pin_conf = json.loads(pin_conf_file.read())
+
+conf_file = open('./config.json')
+conf = json.loads(conf_file.read())
+pinDao = __import__(conf["PIN_DAO_NAME"])
+
 
 class Pin:
     def __init__(self, pinId, pinType, mode):
@@ -16,6 +24,8 @@ class NotAllowedPinException(Exception):
 
 def init():
     GPIO.setmode(GPIO.BOARD)
+    global pinList
+    pinList = initPinData()
 
 def isValid(pin):
     if pin < 1 or pin > pin_conf['pinNumber']:
@@ -33,6 +43,10 @@ def initPinData():
             "value": "-"
             }
     return data
+
+def getPins():
+    #return pinDao.getPins()
+    return pinList
 
 def setOut(pinStr):
     pin = int(pinStr)
@@ -62,11 +76,9 @@ def clear(pinStr):
     pinList['pin' + pinStr]['mode']= "-"
     pinList['pin' + pinStr]['value']= "-"
 
+
 if __name__ == '__main__':
     # Tests
-    pin_conf_file = open('pin_config.json')
-    pin_conf = json.loads(pin_conf_file.read())
-    pinList = initPinData()
     print("Number of pins: " + str(pin_conf['pinNumber']))
     init()
     #raise NotAllowedPinException
@@ -87,7 +99,3 @@ if __name__ == '__main__':
     print(pinList)
     #on(16)
     #GPIO.setup(5, GPIO.OUT)
-else:
-    pin_conf_file = open('./Model/pin_config.json')
-    pin_conf = json.loads(pin_conf_file.read())
-    pinList = initPinData()
