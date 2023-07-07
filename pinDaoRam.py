@@ -3,15 +3,29 @@ import json
 pin_conf_file = open('./pin_config.json')
 pin_conf = json.loads(pin_conf_file.read())
 
+pinList = {}
+
 def getPins():
-	data = {}
-	for i in range(1, pin_conf['pinNumber'] + 1):
-		iStr = str(i)
-		data["pin" + iStr] = {
-			"name": iStr,
-			"enabled": pin_conf[iStr],
-			"mode": "-",
-			"value": "-"
+	return pinList
+
+def add(pinId, name, enabled, mode, value):
+	global pinList
+	pinList[pinId] = {
+		"name": name,
+		"mode": mode,
+		"value": value
 		}
-	return data
 	
+def getPin(pinId):
+	global pinList
+	return pinList[pinId]
+
+def update(pinId, name, mode, value):
+	global pinList
+	pinList[pinId] = {
+		"name": name,
+		"mode": mode,
+		"value": value
+		}
+
+

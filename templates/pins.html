@@ -14,33 +14,44 @@
       Pins
    </button>
    
+   <form action = "http://localhost:8080/pins" method = "post">
+      <table>
+         <tr>
+            <td>Pin:</td>
+            <td>Mode:</td>
+            <td>Value:</td>
+         </tr>
+         <tr>
+            <td><input type = "number" name = "pin" value="1"/></td>
+            <td><select name="mode" id="mode">
+               <option value="Disabled">Disabled</option>
+               <option value="Inactive" selected>Inactive</option>
+               <option value="Output">Output</option>
+               <option value="Input">Input</option>
+            </select></td>
+            <td><select name="value" id="value">
+               <option value="-">-</option>
+               <option value="On">On</option>
+               <option value="Off">Off</option>
+            </select></td>
+         </tr>
+         <tr>
+            <td><input type = "submit" /></td>
+         </tr>
+      </table>
+   </form>
+
+   <p></p>
 
    <table>
       <tr>
-         <th>Pin</th><th>Enabled</th><th>Mode</th><th>Value</th>
+         <th>Pin</th><th>Mode</th><th>Value</th>
       </tr>
       {% for key, value in pinData.items() %}
          <tr> 
             <td>{{ value.name }}</td>
-            <td>{{ value.enabled }}</td>
-            {% if value.enabled == False %}
-            <td><button disabled>{{ value.mode }}</button></td>
-            {% elif value.mode == "-" %}
-            <td><button onclick="window.location.href='/pins/{{value.name}}/out';">{{ value.mode }}</button></td>
-            {% elif value.mode == "Output" %}
-            <td><button onclick="window.location.href='/pins/{{value.name}}/in';">{{ value.mode }}</button></td>
-            {% else %}
-            <td><button onclick="window.location.href='/pins/{{value.name}}/clear';">{{ value.mode }}</button></td>
-            {% endif %}
-            {% if value.mode == "Output" %}
-               {% if value.value == "Off" %}
-               <td><button onclick="window.location.href='/pins/{{value.name}}/on';">{{ value.value }}</button></td>
-               {% else %}
-               <td><button onclick="window.location.href='/pins/{{value.name}}/off';">{{ value.value }}</button></td>
-               {% endif %}
-            {% else %}
+            <td>{{ value.mode }}</td>
             <td>{{ value.value }}</td>
-            {% endif %}
          </tr>
       {% endfor %}
    </table>

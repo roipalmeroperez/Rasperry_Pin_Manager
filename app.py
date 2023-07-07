@@ -17,8 +17,11 @@ def forbidenWeb():
 def errorWeb():
     return abort(500)
 
-@app.route('/pins')
+@app.route('/pins', methods = ['POST', 'GET'])
 def pinweb():
+    if request.method == 'POST':
+        pins.updatePin('pin' + request.form['pin'], request.form['pin'], 
+            request.form['mode'], request.form['value'])
     
     return render_template('pins.html', pinData = pins.getPins())
     

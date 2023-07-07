@@ -24,30 +24,32 @@ class NotAllowedPinException(Exception):
 
 def init():
     GPIO.setmode(GPIO.BOARD)
-    global pinList
-    pinList = initPinData()
+    initPinData()
 
 def isValid(pin):
     if pin < 1 or pin > pin_conf['pinNumber']:
         return False
-    return pin_conf[str(pin)]
+    return True
 
 def initPinData():
-    data = {}
     for i in range(1, pin_conf['pinNumber'] + 1):
         iStr = str(i)
-        data["pin" + iStr] = {
-            "name": iStr,
-            "enabled": pin_conf[iStr],
-            "mode": "-",
-            "value": "-"
-            }
-    return data
+        if pin_conf[iStr]:
+            mode = "Inactive"
+        else:
+            mode = "Disabled"
+        pinDao.add("pin" + iStr, iStr, pin_conf[iStr], mode, "-")
 
 def getPins():
-    #return pinDao.getPins()
-    return pinList
+    return pinDao.getPins()
 
+def updatePin(pinId, name, mode, value):
+    if isValid(int(name)):
+        pin = pinDao.getPin(pinId)
+        if pin["mode"] != "Disabled":
+            pinDao.update(pinId, name, mode, value)
+
+"""
 def setOut(pinStr):
     pin = int(pinStr)
     if isValid(pin):
@@ -76,6 +78,7 @@ def clear(pinStr):
     pinList['pin' + pinStr]['mode']= "-"
     pinList['pin' + pinStr]['value']= "-"
 
+"""
 
 if __name__ == '__main__':
     # Tests
