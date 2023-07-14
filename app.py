@@ -1,9 +1,13 @@
-import pins as pins
+import pins, timer
+import threading
+import time
+import json
 from flask import Flask, render_template, abort, request
 
 
 app = Flask(__name__)
 rules = {}
+
 
 @app.route('/')
 def index():
@@ -54,6 +58,13 @@ def rulesWeb():
     
     return render_template('rules.html', rulesData = rules)
 
+@app.route('/pins/update', methods = ['POST'])
+def pinUpdate():
+    data = {"status": "success"}
+    return data, 200
+
 if __name__ == '__main__':
     pins.init()
+    timerThread = threading.Thread(target=timer.timer, daemon=True)
+    timerThread.start()
     app.run(debug=True, host='0.0.0.0', port=8080)    
