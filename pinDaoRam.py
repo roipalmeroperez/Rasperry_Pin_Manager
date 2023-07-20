@@ -1,8 +1,3 @@
-import json
-
-pin_conf_file = open('./pin_config.json')
-pin_conf = json.loads(pin_conf_file.read())
-
 pinList = {}
 
 def getPins():

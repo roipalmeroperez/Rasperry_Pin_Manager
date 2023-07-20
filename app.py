@@ -1,9 +1,12 @@
-import pins, timer
-import threading
-import time
 import json
+import threading
 from flask import Flask, render_template, abort, request
 
+conf_file = open('./config.json')
+conf = json.loads(conf_file.read())
+
+import pins
+import timer
 
 app = Flask(__name__)
 rules = {}
@@ -28,7 +31,6 @@ def pinweb():
             request.form['mode'], request.form['value'])
     
     return render_template('pins.html', pinData = pins.getPins())
-    
 
 @app.route('/pins/<pin>/<action>')
 def pinset(pin, action):
@@ -44,8 +46,7 @@ def pinset(pin, action):
         pins.clear(pin)
     else:
         print('Pin: ' + str(pin) + ', action: ' + action)
-        
-    templateData = pins.pinList
+    
     return render_template('pins.html', pinData = pins.getPins())
         
 @app.route('/rules', methods = ['POST', 'GET'])
@@ -60,6 +61,7 @@ def rulesWeb():
 
 @app.route('/pins/update', methods = ['POST'])
 def pinUpdate():
+    pins.updateInputPins()
     data = {"status": "success"}
     return data, 200
 

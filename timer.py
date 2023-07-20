@@ -1,9 +1,7 @@
 import time
 import requests
 import json
-
-conf_file = open('./config.json')
-conf = json.loads(conf_file.read())
+from app import conf as conf
 
 def doWork():
 	url = conf["TIMER_URL"]
