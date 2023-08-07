@@ -22,7 +22,7 @@
             <td>Value:</td>
          </tr>
          <tr>
-            <td><input type = "number" name = "pin" value="1"/></td>
+            <td><input name = "pin"/></td>
             <td><select name="mode" id="mode">
                <option value="Disabled">Disabled</option>
                <option value="Inactive" selected>Inactive</option>
@@ -49,7 +49,7 @@
       </tr>
       {% for key, value in pinData.items() %}
          <tr> 
-            <td>{{ value.name }}</td>
+            <td>{{ key }}</td>
             <td>{{ value.mode }}</td>
             <td>{{ value.value }}</td>
          </tr>

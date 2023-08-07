@@ -3,12 +3,22 @@
       <form action = "http://localhost:8080/rules" method = "post">
          <table>
             <tr>
-               <td>Enter Name:</td>
-               <td>Enter Password:</td>
+               <td>Pin Input 1:</td>
+               <td>Operation:</td>
+               <td>Pin Input 2 | value:</td>
+               <td>Pin Output:</td>
+               <td>Output value:</td>
             </tr>
             <tr>
-               <td><input type = "text" name = "name" /></td>
-               <td><input type = "text" name = "password" /></td>
+               <td><input type = "text" name = "input1" /></td>
+               <td><select name="mode" id="mode">
+                  <option value="greater than">greater than</option>
+                  <option value="less than">less than</option>
+                  <option value="equals">equals</option>
+               </select></td>
+               <td><input type = "text" name = "input2" /></td>
+               <td><input type = "text" name = "output" /></td>
+               <td><input type = "text" name = "valueOutput" /></td>
             </tr>
             <tr>
                <td><input type = "submit" /></td>

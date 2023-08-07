@@ -5,11 +5,9 @@ from flask import Flask, render_template, abort, request
 conf_file = open('./config.json')
 conf = json.loads(conf_file.read())
 
-import pins
-import timer
+import pins, rules, timer
 
 app = Flask(__name__)
-rules = {}
 
 
 @app.route('/')
@@ -27,12 +25,11 @@ def errorWeb():
 @app.route('/pins', methods = ['POST', 'GET'])
 def pinweb():
     if request.method == 'POST':
-        pins.updatePin('pin' + request.form['pin'], request.form['pin'], 
-            request.form['mode'], request.form['value'])
+        pins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
     
     return render_template('pins.html', pinData = pins.getPins())
 
-@app.route('/pins/<pin>/<action>')
+"""@app.route('/pins/<pin>/<action>')
 def pinset(pin, action):
     if action == 'out':
         pins.setOut(pin)
@@ -48,16 +45,14 @@ def pinset(pin, action):
         print('Pin: ' + str(pin) + ', action: ' + action)
     
     return render_template('pins.html', pinData = pins.getPins())
-        
+"""        
 @app.route('/rules', methods = ['POST', 'GET'])
 def rulesWeb():
-    if request.method == 'POST':
-        rules[len(rules)] = {
-            'name': request.form['name'],
-            'password': request.form['password']
-            }
-    
-    return render_template('rules.html', rulesData = rules)
+    """if request.method == 'POST':
+        rules.addRule(request.form)
+    """
+    return render_template('rules.html', rulesData = rules.getRules())
+    #return render_template('rules.html', rulesData = pins.getPins())
 
 @app.route('/pins/update', methods = ['POST'])
 def pinUpdate():

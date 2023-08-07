@@ -2,7 +2,6 @@ import RPi.GPIO as GPIO
 import json
 from app import conf as conf
 
-pinList = {}
 pin_conf_file = open('./pin_config.json')
 pin_conf = json.loads(pin_conf_file.read())
 
@@ -37,16 +36,15 @@ def initPinData():
             mode = "Inactive"
         else:
             mode = "Disabled"
-        pinDao.add("pin" + iStr, iStr, pin_conf[iStr], mode, "-")
+        pinDao.add(conf["HOST"]+":"+iStr, mode, "-")
 
 def getPins():
     return pinDao.getPins()
 
-def updatePin(pinId, name, mode, value):
-    if isValid(int(name)):
-        pin = pinDao.getPin(pinId)
-        if pin["mode"] != "Disabled":
-            pinDao.update(pinId, name, mode, value)
+def updatePin(pinId, mode, value):
+    pin = pinDao.getPin(pinId)
+    if pin["mode"] != "Disabled":
+        pinDao.update(pinId, mode, value)
 
 def updateInputPins():
     pinData = getPins()
@@ -55,7 +53,7 @@ def updateInputPins():
         if pin["mode"] == "Input":
             #pin["value"] = GPIO.input(pin["name"])
             pin["value"] = "Input"
-            pinDao.update("pin" + pin["name"], pin["name"], pin["mode"], pin["value"])
+            pinDao.update(pinId, pin["mode"], pin["value"])
             
 
 """
