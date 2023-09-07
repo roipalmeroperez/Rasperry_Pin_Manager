@@ -42,9 +42,76 @@ def getPins():
     return pinDao.getPins()
 
 def updatePin(pinId, mode, value):
+    pinIdSplited = pinId.split(":")
+    pinNumber = int(pinIdSplited[1])
+    
     pin = pinDao.getPin(pinId)
-    if pin["mode"] != "Disabled":
-        pinDao.update(pinId, mode, value)
+    
+    #if isValid()
+    if mode == "Disabled":
+        #set Disabled
+        if pin["mode"] == "Disabled":
+            pass
+        elif pin["mode"] == "Inactive":
+            pinDao.update(pinId, mode, "-")
+        elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
+            GPIO.cleanup(pinNumber)
+            pinDao.update(pinId, mode, "-")
+    elif mode == "Inactive":
+        #set Inactive
+        if pin["mode"] == "Disabled" or pin["mode"] == "Inactive":
+            pass
+        elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
+            GPIO.cleanup(pinNumber)
+            pinDao.update(pinId, mode, "-")
+    elif mode == "Output":
+        #set Output
+        if pin["mode"] == "Disabled":
+            pass
+        elif pin["mode"] == "Inactive":
+            if value == "On":
+                GPIO.setup(pinNumber, GPIO.OUT)
+                GPIO.output(pinNumber, GPIO.HIGH)
+                pinDao.update(pinId, mode, value)
+            elif value == "Off":
+                GPIO.setup(pinNumber, GPIO.OUT)
+                GPIO.output(pinNumber, GPIO.LOW)
+                pinDao.update(pinId, mode, value)
+        elif pin["mode"] == "Output":
+            if value == "On":
+                GPIO.output(pinNumber, GPIO.HIGH)
+                pinDao.update(pinId, mode, value)
+            elif value == "Off":
+                GPIO.output(pinNumber, GPIO.LOW)
+                pinDao.update(pinId, mode, value)
+        elif pin["mode"] == "Input":
+            pass
+        elif pin["mode"] == "PWM":
+            pass
+    elif mode == "Input":
+        #set Input
+        if pin["mode"] == "Disabled":
+            pass
+        elif pin["mode"] == "Inactive":
+            pass
+        elif pin["mode"] == "Output":
+            pass
+        elif pin["mode"] == "Input":
+            pass
+        elif pin["mode"] == "PWM":
+            pass
+    elif mode == "PWM":
+        #set PWM
+        if pin["mode"] == "Disabled":
+            pass
+        elif pin["mode"] == "Inactive":
+            pass
+        elif pin["mode"] == "Output":
+            pass
+        elif pin["mode"] == "Input":
+            pass
+        elif pin["mode"] == "PWM":
+            pass
 
 def updateInputPins():
     pinData = getPins()
@@ -91,9 +158,12 @@ if __name__ == '__main__':
     # Tests
     print("Number of pins: " + str(pin_conf['pinNumber']))
     init()
+    #print(getPins())
     #raise NotAllowedPinException
     #setOut('25')
-    print("Pin 13 enable: " + str(isValid('13')))
+    
+    
+    """print("Pin 13 enable: " + str(isValid(13)))
     print("Pin 13 enable: " + str(pin_conf['13']))
     GPIO.setup(13, GPIO.OUT)
     GPIO.setup(13, GPIO.OUT)
@@ -108,4 +178,4 @@ if __name__ == '__main__':
     print("Pin 25 enable: " + str(pin_conf['25']))
     print(pinList)
     #on(16)
-    #GPIO.setup(5, GPIO.OUT)
+    #GPIO.setup(5, GPIO.OUT)"""

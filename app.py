@@ -23,7 +23,7 @@ def errorWeb():
     return abort(500)
 
 @app.route('/pins', methods = ['POST', 'GET'])
-def pinweb():
+def pinWeb():
     if request.method == 'POST':
         pins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
     
@@ -52,7 +52,6 @@ def rulesWeb():
         rules.addRule(request.form)
     """
     return render_template('rules.html', rulesData = rules.getRules())
-    #return render_template('rules.html', rulesData = pins.getPins())
 
 @app.route('/pins/update', methods = ['POST'])
 def pinUpdate():

@@ -14,7 +14,7 @@
       Pins
    </button>
    
-   <form action = "http://localhost:8080/pins" method = "post">
+   <form action = "/pins" method = "post">
       <table>
          <tr>
             <td>Pin:</td>
@@ -28,12 +28,9 @@
                <option value="Inactive" selected>Inactive</option>
                <option value="Output">Output</option>
                <option value="Input">Input</option>
+               <option value="PWM">PWM</option>
             </select></td>
-            <td><select name="value" id="value">
-               <option value="-">-</option>
-               <option value="On">On</option>
-               <option value="Off">Off</option>
-            </select></td>
+            <td><input name = "value"/></td>
          </tr>
          <tr>
             <td><input type = "submit" /></td>
