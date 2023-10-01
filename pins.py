@@ -1,4 +1,5 @@
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import GPIO_mock as GPIO
 import json
 from app import conf as conf
 
@@ -68,7 +69,7 @@ def updatePin(pinId, mode, value):
         #set Output
         if pin["mode"] == "Disabled":
             pass
-        elif pin["mode"] == "Inactive":
+        elif pin["mode"] == "Inactive" or pin["mode"] == "Input":
             if value == "On":
                 GPIO.setup(pinNumber, GPIO.OUT)
                 GPIO.output(pinNumber, GPIO.HIGH)
@@ -84,22 +85,19 @@ def updatePin(pinId, mode, value):
             elif value == "Off":
                 GPIO.output(pinNumber, GPIO.LOW)
                 pinDao.update(pinId, mode, value)
-        elif pin["mode"] == "Input":
-            pass
         elif pin["mode"] == "PWM":
             pass
     elif mode == "Input":
         #set Input
         if pin["mode"] == "Disabled":
             pass
-        elif pin["mode"] == "Inactive":
-            pass
-        elif pin["mode"] == "Output":
-            pass
+        elif pin["mode"] == "Inactive" or pin["mode"] == "Output" or pin["mode"] == "PWM":
+            GPIO.setup(pinNumber, GPIO.IN)
+            value = GPIO.input(pinNumber)
+            pinDao.update(pinId, mode, value)
         elif pin["mode"] == "Input":
-            pass
-        elif pin["mode"] == "PWM":
-            pass
+            value = GPIO.input(pinNumber)
+            pinDao.update(pinId, mode, value)
     elif mode == "PWM":
         #set PWM
         if pin["mode"] == "Disabled":
@@ -117,9 +115,11 @@ def updateInputPins():
     pinData = getPins()
     for pinId in pinData:
         pin = pinData[pinId]
+        
         if pin["mode"] == "Input":
-            #pin["value"] = GPIO.input(pin["name"])
-            pin["value"] = "Input"
+            pinIdSplited = pinId.split(":")
+            pinNumber = int(pinIdSplited[1])
+            pin["value"] = GPIO.input(pinNumber)
             pinDao.update(pinId, pin["mode"], pin["value"])
             
 
