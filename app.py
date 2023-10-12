@@ -1,11 +1,11 @@
-import json
+import json, requests
 import threading
 from flask import Flask, render_template, abort, request
 
 conf_file = open('./config.json')
 conf = json.loads(conf_file.read())
 
-import pins, rules, timer
+import pins, devicesDaoRam, rules, timer
 
 app = Flask(__name__)
 
@@ -22,12 +22,9 @@ def forbidenWeb():
 def errorWeb():
     return abort(500)
 
-@app.route('/pins', methods = ['POST', 'GET'])
+@app.route('/pins')
 def pinWeb():
-    if request.method == 'POST':
-        pins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
-    
-    return render_template('pins.html', pinData = pins.getPins())
+    return pins.getPins(), 200
 
 """@app.route('/pins/<pin>/<action>')
 def pinset(pin, action):
@@ -52,6 +49,22 @@ def rulesWeb():
         rules.addRule(request.form)
     """
     return render_template('rules.html', rulesData = rules.getRules())
+
+@app.route('/devices', methods = ['POST', 'GET'])
+def devicesWeb():
+    if request.method == 'POST':
+        devicesDaoRam.addDevice(request.form['device'])
+    
+    return render_template('devices.html', devicesData = devicesDaoRam.getDevices())
+
+@app.route('/devices/<device>', methods = ['POST', 'GET'])
+def devicesPinWeb(device):
+    if request.method == 'POST':
+        pins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
+    url ="http://" + device + ":8080/pins"
+    response = requests.get(url)
+    
+    return render_template('pins.html', pinData = json.loads(response.text))
 
 @app.route('/pins/update', methods = ['POST'])
 def pinUpdate():
