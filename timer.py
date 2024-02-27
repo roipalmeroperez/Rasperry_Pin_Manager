@@ -4,7 +4,7 @@ import json
 from app import conf as conf
 
 def doWork():
-	url = conf["TIMER_URL"]
+	url = "http://localhost:" + str(conf["PORT"]) + "/pins/update"
 	requests.post(url)
 
 def timer():

@@ -2,5 +2,9 @@
 	"DATABASE_HOST": "host",
 	"DATABASE_USER": "user",
 	"DATABASE_PASSWORD": "password",
-	"HISTORIC_DAO_NAME": "daoName"
+	"HOST": "x.x.x.x",
+	"HOST_MASTER": "x.x.x.x",
+	"PWM_FREQUENCY_HZ": 50,
+	"PIN_DAO_NAME": "pinDao",
+	"TIMER_INTERVAL_SECONDS": 10.0
 }
