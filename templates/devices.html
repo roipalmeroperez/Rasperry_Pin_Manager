@@ -1,0 +1,29 @@
+<html>
+   <body>
+      <form action = "http://localhost:8080/devices" method = "post">
+         <table>
+            <tr>
+               <td>New device:</td>
+               <td><select name="method" id="method">
+               <option value="ADD" selected>Add</option>
+               <option value="DELETE">Delete</option>
+            </select></td>
+               <td><input type = "text" name = "device" /></td>
+            </tr>
+            <tr>
+               <td><input type = "submit" /></td>
+            </tr>
+         </table>
+      </form>
+      <table>
+      <tr>
+         <th>Address</th>
+      </tr>
+      {% for device in devicesData %}
+         <tr> 
+            <td><a href="/devices/{{ device }}">{{ device }}</a></td>
+         </tr>
+      {% endfor %}
+   </table>
+   </body>
+</html>
