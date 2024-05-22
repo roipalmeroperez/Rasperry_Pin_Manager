@@ -5,54 +5,56 @@ from flask import Flask, render_template, abort, request
 conf_file = open('./config.json')
 conf = json.loads(conf_file.read())
 
-import pins, devicesDaoRam, rules, timer
+import pins, devices, rules, timer
+
+
+#import localPinsMock as localPins
+import localPins
 
 app = Flask(__name__)
 
+# Server
+
 @app.route('/')
 def index():
-    if conf["IS_MASTER"]:
+    if conf["IS_SERVER"]:
         return render_template('index.html')
     else:
-        return abort(403, "This host is not a master.")
-
-@app.route('/pins')
-def pinWeb():
-    return pins.getPins(), 200
-
-@app.route('/pins/update', methods = ['POST'])
-def pinUpdate():
-    pins.updateInputPins()
-    # modificar para envió desde el esclavo al maestro
-    data = {"status": "success"}
-    return data, 200
-
-@app.route('/pins/update/<host>', methods = ['POST', 'GET'])
-def pinUpdateHost():
-    
-    return data, 200
+        return abort(403, "This host is not a server.")
 
 @app.route('/devices', methods = ['POST', 'GET'])
 def devicesWeb():
-    if request.method == 'POST':
-        if request.form['method'] == 'ADD':
-            devicesDaoRam.addDevice(request.form['device'])
-        elif request.form['method'] == 'DELETE':
-            devicesDaoRam.removeDevice(request.form['device'])
     
-    return render_template('devices.html', devicesData = devicesDaoRam.getDevices())
+    if conf["IS_SERVER"]:
+        if request.method == 'POST':
+            
+            if request.form['method'] == 'ADD':
+                status = devices.addDevice(request.form['device'])
+            elif request.form['method'] == 'DELETE':
+                status = devices.removeDevice(request.form['device'])
+            else:
+                return abort(400)
+            
+            if status == 200 or status == 201:
+                pass
+            else:
+                abort(status)
+        
+        return render_template('devices.html', devicesData = devices.getDevices())
+    else:
+        return abort(403, "This host is not a server.")
+    
 
 @app.route('/devices/<device>', methods = ['POST', 'GET'])
 def devicesPinWeb(device):
+    data = {}
     if request.method == 'POST':
-        pins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
-        
-        #return {"status": "success"}, 200
+        data = pins.updatePin(device, request.form['pin'], request.form['mode'], request.form['value'])
 
-    url ="http://" + device + ":" + str(conf["PORT"]) + "/pins"
-    response = requests.get(url)
+    else:
+        data = pins.getPins(device)
     
-    return render_template('pins.html', pinData = json.loads(response.text))
+    return render_template('pins.html', pinData = json.loads(data))
 
 @app.route('/rules', methods = ['POST', 'GET'])
 def rulesWeb():
@@ -61,8 +63,60 @@ def rulesWeb():
     """
     return render_template('rules.html', rulesData = rules.getRules())
 
+@app.route('/pins/update/<host>', methods = ['POST'])
+def pinUpdateHost(host):
+    #data = requests.text
+    
+    return {"status": "success"}, 200
+
+# Host
+serversList = []
+
+@app.route('/servers', methods = ['POST', 'DELETE', 'GET'])
+def serversRoute():
+    global serversList
+    
+    try:
+        if request.method == 'GET':
+            return {"servers": serversList}, 200
+        elif request.method == 'POST':
+            serversList.append(request.host)
+            return {"status": "success"}, 201
+        elif request.method == 'DELETE':
+            serversList.remove(request.host)
+            return {"status": "success"}, 200
+        else:
+            return {"status": "fail"}, 500
+    except:
+        return {"status": "fail"}, 500
+
+@app.route('/pins')
+def pinWeb():
+    return localPins.getPins(), 200
+
+@app.route('/pins/update', methods = ['POST'])
+def pinUpdate():
+    localPins.updatePin2(request.form['pin'], request.form['mode'], request.form['value'])
+    return localPins.getPins(), 200
+
+@app.route('/pins/updateInputs', methods = ['POST'])
+def pinUpdateInputs():
+    global serversList
+    
+    #data = localPins.updateInputPins()
+    data = {"status": "success"}
+    for server in serversList:
+        url = "http://" + server + "/pins/update/" + conf["HOST"]
+        requests.post(url, files = data)
+        
+    data = {"status": "success"}
+    return data, 200
+
+
+
+
 if __name__ == '__main__':
-    pins.init()
+    localPins.initPins()
     timerThread = threading.Thread(target=timer.timer, daemon=True)
     timerThread.start()
     app.run(debug=True, host='0.0.0.0', port=conf["PORT"])    

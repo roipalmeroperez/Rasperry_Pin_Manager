@@ -3,37 +3,46 @@
       <form action = "http://localhost:8080/rules" method = "post">
          <table>
             <tr>
-               <td>Pin Input 1:</td>
+               <td>Pin Input:</td>
                <td>Operation:</td>
-               <td>Pin Input 2 | value:</td>
+               <td>Value Input:</td>
                <td>Pin Output:</td>
-               <td>Output value:</td>
+               <td>Value Output:</td>
             </tr>
             <tr>
-               <td><input type = "text" name = "input1" /></td>
-               <td><select name="mode" id="mode">
+               <td><input type = "text" name = "inputId" /></td>
+               <td><select name="operation" id="operation">
                   <option value="greater than">greater than</option>
                   <option value="less than">less than</option>
                   <option value="equals">equals</option>
+                  <option value="not equals">not equals</option>
                </select></td>
-               <td><input type = "text" name = "input2" /></td>
-               <td><input type = "text" name = "output" /></td>
-               <td><input type = "text" name = "valueOutput" /></td>
+               <td><input type = "text" name = "valueInput" /></td>
+               <td><input type = "text" name = "outputId" /></td>
+               <td><input type = "text" name = "outputValue" /></td>
             </tr>
+            <tr>
+               <td>Delete rule:</td>
+               <td><input type = "text" name = "deletedRuleId" /></td>
+            <tr>
             <tr>
                <td><input type = "submit" /></td>
             </tr>
          </table>
       </form>
+      
       <table>
       <tr>
-         <th>Number</th><th>Name</th><th>Password</th>
+         <th>Rule Id</th><th>Pin Input</th><th>Operation</th><th>Value Input</th><th>Pin Output</th><th>Value Output</th>
       </tr>
       {% for key, value in rulesData.items() %}
          <tr> 
             <td>{{ key }}</td>
-            <td>{{ value.name }}</td>
-            <td>{{ value.password }}</td>
+            <td>{{ value.inputId }}</td>
+            <td>{{ value.operation }}</td>
+            <td>{{ value.valueInput }}</td>
+            <td>{{ value.outputId }}</td>
+            <td>{{ value.outputValue }}</td>
          </tr>
       {% endfor %}
    </table>

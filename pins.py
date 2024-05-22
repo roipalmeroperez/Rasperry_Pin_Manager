@@ -1,6 +1,6 @@
 #import RPi.GPIO as GPIO
 import GPIO_mock as GPIO
-import json
+import json, requests
 from app import conf as conf
 
 pin_conf_file = open('./pin_config.json')
@@ -9,7 +9,7 @@ pin_conf = json.loads(pin_conf_file.read())
 pinDao = __import__(conf["PIN_DAO_NAME"])
 
 
-class Pin:
+"""class Pin:
     def __init__(self, pinId, pinType, mode):
         self.pinId = pinId
         self.mode = mode
@@ -19,99 +19,27 @@ class NotAllowedPinException(Exception):
     
     def __init__(self):
         self.message = "Illegal pin assignment"
-        super().__init__(self.message)
-
-def init():
-    GPIO.setmode(GPIO.BOARD)
-    initPinData()
+        super().__init__(self.message)"""
 
 def isValid(pin):
     if pin < 1 or pin > pin_conf['pinNumber']:
         return False
     return True
 
-def initPinData():
-    for i in range(1, pin_conf['pinNumber'] + 1):
-        iStr = str(i)
-        if pin_conf[iStr]:
-            mode = "Inactive"
-        else:
-            mode = "Disabled"
-        pinDao.add(conf["HOST"]+":"+iStr, mode, "-")
-
-def getPins():
-    return pinDao.getPins()
-
-def updatePin(pinId, mode, value):
-    pinIdSplited = pinId.split(":")
-    pinNumber = int(pinIdSplited[1])
+def getPins(host):
+    response = requests.get("http://" + host + "/pins")
     
-    pin = pinDao.getPin(pinId)
-    
-    #if isValid()
-    if mode == "Disabled":
-        #set Disabled
-        if pin["mode"] == "Disabled":
-            pass
-        elif pin["mode"] == "Inactive":
-            pinDao.update(pinId, mode, "-")
-        elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
-            GPIO.cleanup(pinNumber)
-            pinDao.update(pinId, mode, "-")
-    elif mode == "Inactive":
-        #set Inactive
-        if pin["mode"] == "Disabled" or pin["mode"] == "Inactive":
-            pass
-        elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
-            GPIO.cleanup(pinNumber)
-            pinDao.update(pinId, mode, "-")
-    elif mode == "Output":
-        #set Output
-        if pin["mode"] == "Disabled":
-            pass
-        elif pin["mode"] == "Inactive" or pin["mode"] == "Input":
-            if value == "On":
-                GPIO.setup(pinNumber, GPIO.OUT)
-                GPIO.output(pinNumber, GPIO.HIGH)
-                pinDao.update(pinId, mode, value)
-            elif value == "Off":
-                GPIO.setup(pinNumber, GPIO.OUT)
-                GPIO.output(pinNumber, GPIO.LOW)
-                pinDao.update(pinId, mode, value)
-        elif pin["mode"] == "Output":
-            if value == "On":
-                GPIO.output(pinNumber, GPIO.HIGH)
-                pinDao.update(pinId, mode, value)
-            elif value == "Off":
-                GPIO.output(pinNumber, GPIO.LOW)
-                pinDao.update(pinId, mode, value)
-        elif pin["mode"] == "PWM":
-            pass
-    elif mode == "Input":
-        #set Input
-        if pin["mode"] == "Disabled":
-            pass
-        elif pin["mode"] == "Inactive" or pin["mode"] == "Output" or pin["mode"] == "PWM":
-            GPIO.setup(pinNumber, GPIO.IN)
-            value = GPIO.input(pinNumber)
-            pinDao.update(pinId, mode, value)
-        elif pin["mode"] == "Input":
-            value = GPIO.input(pinNumber)
-            pinDao.update(pinId, mode, value)
-    elif mode == "PWM":
-        #set PWM
-        if pin["mode"] == "Disabled":
-            pass
-        elif pin["mode"] == "Inactive":
-            pass
-        elif pin["mode"] == "Output":
-            pass
-        elif pin["mode"] == "Input":
-            pass
-        elif pin["mode"] == "PWM":
-            pass
+    #return pinDao.getPins()
+    return response.text
 
-def updateInputPins():
+def updatePin(host, pinId, mode, value):
+    dataForm = {'pin': (None, pinId), 'mode': (None, mode), 'value': (None, value)}
+    response = requests.post("http://" + host + "/pins/update", files = dataForm)
+
+    #pinDao.updatePins(response.text)
+    return response.text
+
+"""def updateInputPins():
     pinData = getPins()
     for pinId in pinData:
         pin = pinData[pinId]
@@ -120,7 +48,7 @@ def updateInputPins():
             pinIdSplited = pinId.split(":")
             pinNumber = int(pinIdSplited[1])
             pin["value"] = GPIO.input(pinNumber)
-            pinDao.update(pinId, pin["mode"], pin["value"])
+            pinDao.update(pinId, pin["mode"], pin["value"])"""
             
 
 """

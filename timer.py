@@ -3,9 +3,7 @@ import requests
 import json
 from app import conf as conf
 
-def doWork():
-	url = "http://localhost:" + str(conf["PORT"]) + "/pins/update"
-	requests.post(url)
+url = "http://localhost:" + str(conf["PORT"]) + "/pins/updateInputs"
 
 def timer():
 	#time.sleep(4)
@@ -16,5 +14,7 @@ def timer():
 		nextTime = prevTime + interval
 		prevTime = nextTime
 		
-		doWork()
+		# work
+		requests.post(url)
+		
 		time.sleep(nextTime - time.time())
