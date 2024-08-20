@@ -12,20 +12,26 @@ def deleteDevice(device):
 
 def addGetAndRemoveDeviceTest():
 	response = requests.get(urlServer + "/devices")
-	if '192.168.1.10' in response.text:
+	host = '192.168.1.10:8080'
+	
+	if host in response.text:
 		return False
 	
-	addDevice('192.168.1.10:8080')
+	addDevice(host)
 	
 	response = requests.get(urlServer + "/devices")
-	if not('192.168.1.10:8080' in response.text):
+	if not(host in response.text):
 		return False
 	
-	deleteDevice('192.168.1.10:8080')
+	deleteDevice(host)
 	
 	response = requests.get(urlServer + "/devices")
-	if '192.168.1.10' in response.text:
+	if host in response.text:
 		return False
+	
+	return True
+
+def modifyPinValuesTest():
 	
 	return True
 

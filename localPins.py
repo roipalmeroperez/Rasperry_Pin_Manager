@@ -1,6 +1,7 @@
 import RPi.GPIO as GPIO
 #import GPIO_mock as GPIO
 import json, time
+import threading
 
 from app import conf as conf
 
@@ -8,10 +9,35 @@ pin_conf_file = open('./pin_config.json')
 pin_conf = json.loads(pin_conf_file.read())
 
 localPins = {}
-pwm = ""
+pwmChannels = {}
+
+def setPWM(pinId, value):
+	global pwmChannels
+	
+	print("Servo modified")
+	if not pinId in pwmChannels.keys():
+		pwmChannels[pinId] = GPIO.PWM(int(pinId), conf["PWM_FREQUENCY_HZ"])
+		pwmChannels[pinId].start(0.0)
+	pwmChannels[pinId].ChangeDutyCycle(value)
+	time.sleep(conf["PWM_SECONDS_DELAY"])
 
 def getPins():
 	return localPins
+
+def loadPinData():
+	global localPins
+	
+	f = open("pinData.json", "r")
+	fileText = f.read()
+	localPins = json.loads(fileText)
+	f.close()
+
+def savePinData():
+	global localPins
+	
+	f = open("pinData.json", "w")
+	f.write(json.dumps(localPins))
+	f.close()
 
 def initPins():
 	global localPins
@@ -26,130 +52,65 @@ def initPins():
 		localPins[iStr] = {"mode": mode, "value": ""}
 
 def updatePin(pinId, mode, value):
-	global localPins
+	global localPins, pwmChannels
 	pin = localPins[pinId]
 	pinNumber = int(pinId)
-	
-	if mode == "Disabled":
-	#set Disabled
-		if pin["mode"] == "Disabled":
-			pass
-		elif pin["mode"] == "Inactive":
-			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = ""
-		elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
-			GPIO.cleanup(pinNumber)
-			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = ""
-	elif mode == "Inactive":
-	#set Inactive
-		if pin["mode"] == "Disabled" or pin["mode"] == "Inactive":
-			pass
-		elif pin["mode"] == "Output" or pin["mode"] == "Input" or pin["mode"] == "PWM":
-			GPIO.cleanup(pinNumber)
-			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = ""
-	elif mode == "Output":
-	#set Output
-		if pin["mode"] == "Disabled":
-			pass
-		elif pin["mode"] == "Inactive" or pin["mode"] == "Input":
-			if value == "On":
-				GPIO.setup(pinNumber, GPIO.OUT)
-				GPIO.output(pinNumber, GPIO.HIGH)
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = value
-			elif value == "Off":
-				GPIO.setup(pinNumber, GPIO.OUT)
-				GPIO.output(pinNumber, GPIO.LOW)
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = value
-		elif pin["mode"] == "Output":
-			if value == "On":
-				GPIO.output(pinNumber, GPIO.HIGH)
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = value
-			elif value == "Off":
-				GPIO.output(pinNumber, GPIO.LOW)
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = value
-		elif pin["mode"] == "PWM":
-			pass
-	elif mode == "Input":
-	#set Input
-		if pin["mode"] == "Disabled":
-			pass
-		elif pin["mode"] == "Inactive" or pin["mode"] == "Output" or pin["mode"] == "PWM":
-			GPIO.setup(pinNumber, GPIO.IN)
-			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = GPIO.input(pinNumber)
-		elif pin["mode"] == "Input":
-			localPins[pinId]["value"] = GPIO.input(pinNumber)
-	elif mode == "PWM":
-	#set PWM
-		if pin["mode"] == "Disabled":
-			pass
-		elif pin["mode"] == "Inactive":
-			pass
-		elif pin["mode"] == "Output":
-			pass
-		elif pin["mode"] == "Input":
-			pass
-		elif pin["mode"] == "PWM":
-			pass
-	
-	return localPins
-
-def updatePin2(pinId, mode, value):
-	global localPins
-	pin = localPins[pinId]
-	pinNumber = int(pinId)
-	global pwm
 	
 	if pin["mode"] == "Disabled":
 		return localPins
-	else:
-		if mode in ["Disabled", "Inactive", "Input", "Output", "PWM"]:
-			if pin["mode"] in ["Input", "Output", "PWM"]:
+	elif mode in ["Disabled", "Inactive", "Input", "Output", "PWM"]:
+		# set Disabled or Inactive
+		if mode in ["Disabled", "Inactive"]:
+			if pin["mode"] in ["Input", "Output"]:
 				GPIO.cleanup(pinNumber)
-				time.sleep(0.2)
-			if mode in ["Disabled", "Inactive"]:
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = ""
-				return localPins
-			elif mode == "Input":
+			elif pin["mode"] == "PWM":
+				GPIO.cleanup(pinNumber)
+				pwmChannels.pop(pinId)
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = ""
+			savePinData()
+			return localPins
+		#set Input
+		elif mode == "Input":
+			if pin["mode"] == "PWM":
+				pwmChannels.pop(pinId)
+			elif pin["mode"] != "Input":
 				GPIO.setup(pinNumber, GPIO.IN)
-				localPins[pinId]["mode"] = mode
-				localPins[pinId]["value"] = GPIO.input(pinNumber)
-				return localPins
-			elif mode == "Output":
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = GPIO.input(pinNumber)
+			savePinData()
+			return localPins
+		#set Output
+		elif mode == "Output":
+			if pin["mode"] in ["Inactive", "Input"]:
 				GPIO.setup(pinNumber, GPIO.OUT)
-				if value == "On":
-					GPIO.output(pinNumber, GPIO.HIGH)
-					localPins[pinId]["mode"] = mode
-					localPins[pinId]["value"] = value
-					return localPins
-				else:
-					GPIO.output(pinNumber, GPIO.LOW)
-					localPins[pinId]["mode"] = mode
-					localPins[pinId]["value"] = "Off"
-					return localPins
-			elif mode == "PWM":
-				GPIO.setup(pinNumber, GPIO.OUT)
-				pwm = GPIO.PWM(pinNumber, 50)
-				pwm.start(2)
-				pwm.ChangeDutyCycle(float(value))
-				time.sleep(0.2)
-				pwm.stop()
-				#GPIO.cleanup(pinNumber)
+			elif pin["mode"] == "PWM":
+				pwmChannels.pop(pinId)
+			if value == "On":
+				GPIO.output(pinNumber, GPIO.HIGH)
 				localPins[pinId]["mode"] = mode
 				localPins[pinId]["value"] = value
+				savePinData()
 				return localPins
+			else:
+				GPIO.output(pinNumber, GPIO.LOW)
+				localPins[pinId]["mode"] = mode
+				localPins[pinId]["value"] = "Off"
+				savePinData()
+				return localPins
+		#set PWM
+		elif mode == "PWM":
+			if pin["mode"] in ["Inactive", "Input"]:
+				GPIO.setup(pinNumber, GPIO.OUT)
+			pwmThread = threading.Thread(target=setPWM, args=(pinId, float(value), ), daemon=False)
+			pwmThread.start()
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = value
+			savePinData()
+			return localPins
 		
-		# Not expected value
-		return localPins
-			
-	
+	# Error
+	return localPins
 
 def updateInputPins():
 	global localPins
@@ -158,33 +119,10 @@ def updateInputPins():
 		if localPins[pinId]["mode"] == "Input":
 			localPins[pinId]["value"] = GPIO.input(int(pinId))
 	
+	savePinData()
 	return localPins
 
-def doWork():
-	global pwm
-	GPIO.setup(10, GPIO.OUT)
-	pwm = GPIO.PWM(10, 50)
-	pwm.start(2)
-	pwm.ChangeDutyCycle(float("12"))
-	time.sleep(0.2)
-	GPIO.cleanup(10)
-	
 if __name__ == '__main__':
 	initPins()
-	print(getPins())
-	#localPins["10"]["mode"] = "Input"
-	#localPins["12"]["mode"] = "Input"
-	#updateInputPins()
-	#updatePin2("07", "Output", "On")
-	updatePin2("10", "PWM", "2")
-	"""GPIO.setup(10, GPIO.OUT)
-	pwm = GPIO.PWM(10, 50)
-	pwm.start(2)
-	pwm.ChangeDutyCycle(float("4"))"""
-	#doWork()
-	#time.sleep(2)
-	print(getPins())
-	GPIO.cleanup()
-	#GPIO.cleanup(10)
-	
-	
+	savePinData()
+

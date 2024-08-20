@@ -1,36 +1,53 @@
-from app import conf as conf
+#from app import conf as conf
 import requests
 
-devicesDao = __import__(conf["DEVICES_DAO_NAME"])
+
+master = ""
+
+devicesList = []
 
 def getDevices():
-	return devicesDao.getDevices()
+	return devicesList
 
 def addDevice(device):
-	if devicesDao.existsDevice(device):
-		return 403
+	global devicesList
+	
+	if device in devicesList:
+		return 200
 	try:
 		url = "http://" + device + "/servers"
 		response = requests.post(url)
 	except:
 		return 404
-	try:
-		devicesDao.addDevice(device)
-	except:
-		return 500
+	
+	devicesList.append(device)
 	
 	return 201
-		
+
+def deleteDevice(device):
+	global devicesList
 	
-def removeDevice(device):
-	if not(devicesDao.existsDevice(device)):
-		return 403
-	try:
-		devicesDao.removeDevice(device)
-		url = "http://" + device + "/servers"
-		response = requests.delete(url)
-	except:
+	if not(device in devicesList):
 		return 404
+	else:
+		devicesList.remove(device)
+		try:
+			url = "http://" + device + "/servers"
+			response = requests.delete(url)
+		except:
+			return 404
 	
 	return 200
-	
+
+def getMaster():
+	global master
+	return master
+
+def addMaster(ipMaster):
+	global master
+	master = ipMaster
+
+def deleteMaster(ipMaster):
+	global master
+	if master == ipMaster:
+		master = ""

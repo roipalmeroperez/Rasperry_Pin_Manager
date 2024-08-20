@@ -3,22 +3,22 @@
       <form action = "http://localhost:8080/rules" method = "post">
          <table>
             <tr>
-               <td>Pin Input:</td>
+               <td>Operand 1:</td>
                <td>Operation:</td>
-               <td>Value Input:</td>
-               <td>Pin Output:</td>
-               <td>Value Output:</td>
+               <td>Operand 2:</td>
+               <td>Output Target:</td>
+               <td>Output Value:</td>
             </tr>
             <tr>
-               <td><input type = "text" name = "inputId" /></td>
+               <td><input type = "text" name = "operand1" /></td>
                <td><select name="operation" id="operation">
                   <option value="greater than">greater than</option>
                   <option value="less than">less than</option>
                   <option value="equals">equals</option>
                   <option value="not equals">not equals</option>
                </select></td>
-               <td><input type = "text" name = "valueInput" /></td>
-               <td><input type = "text" name = "outputId" /></td>
+               <td><input type = "text" name = "operand2" /></td>
+               <td><input type = "text" name = "outputTarget" /></td>
                <td><input type = "text" name = "outputValue" /></td>
             </tr>
             <tr>
@@ -33,16 +33,17 @@
       
       <table>
       <tr>
-         <th>Rule Id</th><th>Pin Input</th><th>Operation</th><th>Value Input</th><th>Pin Output</th><th>Value Output</th>
+         <th>Rule Id</th><th>Operand 1</th><th>Operation</th><th>Operand 2</th><th>Output Target</th><th>Output Value</th><th>Rule Value</th>
       </tr>
       {% for key, value in rulesData.items() %}
          <tr> 
             <td>{{ key }}</td>
-            <td>{{ value.inputId }}</td>
+            <td>{{ value.operand1 }}</td>
             <td>{{ value.operation }}</td>
-            <td>{{ value.valueInput }}</td>
-            <td>{{ value.outputId }}</td>
+            <td>{{ value.operand2 }}</td>
+            <td>{{ value.outputTarget }}</td>
             <td>{{ value.outputValue }}</td>
+            <td>{{ value.ruleValue }}</td>
          </tr>
       {% endfor %}
    </table>

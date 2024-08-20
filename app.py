@@ -35,10 +35,9 @@ def devicesWeb():
             else:
                 return abort(400)
             
-            if status == 200 or status == 201:
-                pass
-            else:
+            if status != 200 and status != 201:
                 abort(status)
+            
         
         return render_template('devices.html', devicesData = devices.getDevices())
     else:
@@ -72,19 +71,25 @@ def pinUpdateHost(host):
 # Host
 serversList = []
 
-@app.route('/servers', methods = ['POST', 'DELETE', 'GET'])
+@app.route('/master', methods = ['POST', 'DELETE', 'GET'])
 def serversRoute():
     global serversList
     
     try:
         if request.method == 'GET':
-            return {"servers": serversList}, 200
+            return {"master": devices.getMaster()}, 200
         elif request.method == 'POST':
-            serversList.append(request.host)
-            return {"status": "success"}, 201
+            code = devices.addMaster(request.host)
+            if code == 200 or code == 201:
+                return {"status": "success"}, code
+            else:
+                return {"status": "fail"}, code
         elif request.method == 'DELETE':
-            serversList.remove(request.host)
-            return {"status": "success"}, 200
+            code = devices.deleteMaster(request.host)
+            if code == 200:
+                return {"status": "success"}, code
+            else:
+                return {"status": "fail"}, code
         else:
             return {"status": "fail"}, 500
     except:
@@ -96,7 +101,7 @@ def pinWeb():
 
 @app.route('/pins/update', methods = ['POST'])
 def pinUpdate():
-    localPins.updatePin2(request.form['pin'], request.form['mode'], request.form['value'])
+    localPins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
     return localPins.getPins(), 200
 
 @app.route('/pins/updateInputs', methods = ['POST'])
@@ -116,7 +121,7 @@ def pinUpdateInputs():
 
 
 if __name__ == '__main__':
-    localPins.initPins()
+    localPins.loadPinData()
     timerThread = threading.Thread(target=timer.timer, daemon=True)
     timerThread.start()
     app.run(debug=True, host='0.0.0.0', port=conf["PORT"])    
