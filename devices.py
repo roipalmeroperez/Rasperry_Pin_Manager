@@ -1,5 +1,10 @@
+"""
+This module contains the code that allows the master to manage 
+the slaves and the slave to identify its master.
+"""
+
 #from app import conf as conf
-import requests
+import requests, pins
 
 
 master = ""
@@ -15,12 +20,17 @@ def addDevice(device):
 	if device in devicesList:
 		return 200
 	try:
-		url = "http://" + device + "/servers"
+		url = "http://" + device + "/master"
 		response = requests.post(url)
 	except:
 		return 404
 	
+	url = "http://" + device + "/pins"
+	response = requests.get(url)
+	pins.addPins(device, response.text)
+	
 	devicesList.append(device)
+	
 	
 	return 201
 
@@ -32,7 +42,7 @@ def deleteDevice(device):
 	else:
 		devicesList.remove(device)
 		try:
-			url = "http://" + device + "/servers"
+			url = "http://" + device + "/master"
 			response = requests.delete(url)
 		except:
 			return 404
@@ -47,7 +57,6 @@ def addMaster(ipMaster):
 	global master
 	master = ipMaster
 
-def deleteMaster(ipMaster):
+def deleteMaster():
 	global master
-	if master == ipMaster:
-		master = ""
+	master = ""

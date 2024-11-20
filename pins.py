@@ -1,5 +1,10 @@
+"""
+This module contains the code that allows the master to manage 
+the slave pins.
+"""
+
 #import RPi.GPIO as GPIO
-import GPIO_mock as GPIO
+#import GPIO_mock as GPIO
 import json, requests
 from app import conf as conf
 
@@ -9,28 +14,19 @@ pin_conf = json.loads(pin_conf_file.read())
 pinDao = __import__(conf["PIN_DAO_NAME"])
 
 
-"""class Pin:
-    def __init__(self, pinId, pinType, mode):
-        self.pinId = pinId
-        self.mode = mode
-
-class NotAllowedPinException(Exception):
-    "Exception raised for illegal pin assignment"
-    
-    def __init__(self):
-        self.message = "Illegal pin assignment"
-        super().__init__(self.message)"""
-
 def isValid(pin):
     if pin < 1 or pin > pin_conf['pinNumber']:
         return False
     return True
 
 def getPins(host):
-    response = requests.get("http://" + host + "/pins")
+    #response = requests.get("http://" + host + "/pins")
+    #return response.text
     
-    #return pinDao.getPins()
-    return response.text
+    return pinDao.getPins(host)
+    
+def addPins(host, pinData):
+    pinDao.addPins(host, pinData)
 
 def updatePin(host, pinId, mode, value):
     dataForm = {'pin': (None, pinId), 'mode': (None, mode), 'value': (None, value)}
@@ -38,6 +34,9 @@ def updatePin(host, pinId, mode, value):
 
     #pinDao.updatePins(response.text)
     return response.text
+
+def updatePins(host, pinData):
+    pinDao.updatePins(host, pinData)
 
 """def updateInputPins():
     pinData = getPins()

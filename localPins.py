@@ -1,3 +1,8 @@
+"""
+This module contains the code that allows the slave to manage 
+its own pins.
+"""
+
 import RPi.GPIO as GPIO
 #import GPIO_mock as GPIO
 import json, time
@@ -27,10 +32,18 @@ def getPins():
 def loadPinData():
 	global localPins
 	
+	initPins()
+	
 	f = open("pinData.json", "r")
 	fileText = f.read()
-	localPins = json.loads(fileText)
+	loadedPins = json.loads(fileText)
 	f.close()
+	
+	for pinId in loadedPins:
+		updatePin(pinId, loadedPins[pinId]["mode"], loadedPins[pinId]["value"])
+		#print("Id:" + pinId + "; Mode: " + loadedPins[pinId]["mode"] + "; Value: " + str(loadedPins[pinId]["value"]))
+		#print(pinId)
+		#print(data)
 
 def savePinData():
 	global localPins
@@ -123,6 +136,8 @@ def updateInputPins():
 	return localPins
 
 if __name__ == '__main__':
-	initPins()
-	savePinData()
+	#initPins()
+	#savePinData()
+	
+	loadPinData()
 

@@ -1,24 +1,23 @@
 pinList = {}
 
-def getPins():
-	return pinList
+def getPins(host):
+	return pinList[host]
 
-def add(pinId, mode, value):
+def addPins(host, pinData):
 	global pinList
-	pinList[pinId] = {
-		"mode": mode,
-		"value": value
-		}
+	pinList[host] = pinData
 	
-def getPin(pinId):
+def getPins(host):
 	global pinList
-	return pinList[pinId]
+	return pinList[host]
 
-def update(pinId, mode, value):
+def update(host, pinId, mode, value):
 	global pinList
-	pinList[pinId] = {
+	pinList[host][pinId] = {
 		"mode": mode,
 		"value": value
 		}
 
-
+def updatePins(host, pinData):
+	global pinList
+	pinList[host] = pinData
