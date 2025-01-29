@@ -12,7 +12,6 @@ conf = json.loads(conf_file.read())
 
 import pins, devices, rules, timer
 
-#import localPinsMock as localPins
 import localPins
 
 app = Flask(__name__)
@@ -34,38 +33,72 @@ def devicesWeb():
     else:
         return abort(403, "This host is not a server.")
 
-"""Cambiar métodos addDevice y removeDevice (no deben gestionar peticiones)"""
 @app.route('/devices', methods = ['POST'])
 def addDeleteDevices():
     
     if conf["IS_SERVER"]:
+        devicesList = devices.getDevices()
+        device = request.form['device']
+        
         if request.form['method'] == 'ADD':
-            status = devices.addDevice(request.form['device'])
+            if device in devicesList:
+                return render_template('devices.html', devicesData = devicesList)
+            
+            else:
+                try:
+                    url = "http://" + device + "/master"
+                    dataForm = {'newMaster': (None, conf["HOST"] + ":" + str(conf["PORT"]))}
+                    response = requests.post(url, files = dataForm)
+                except:
+                    return abort(404)
+                    
+                url = "http://" + device + "/pins"
+                response = requests.get(url)
+                data = json.loads(response.text)
+                pins.addPins(device, data)
+                
+                devicesList = devices.addDevice(device)
+            
         elif request.form['method'] == 'DELETE':
-            status = devices.deleteDevice(request.form['device'])
+            if not(device in devicesList):
+                return abort(404)
+            
+            else:
+                devicesList = devices.deleteDevice(device)
+                pins.deletePins(device)
+                try:
+                    url = "http://" + device + "/master"
+                    response = requests.delete(url)
+                except:
+                    abort(404)
+        
         else:
             return abort(400)
         
-        if status != 200 and status != 201:
-            abort(status)
-            
-        
-        return render_template('devices.html', devicesData = devices.getDevices())
+        return render_template('devices.html', devicesData = devicesList)
     else:
         return abort(403, "This host is not a server.")
 
-"""Dividir en 2 métodos"""
-@app.route('/devices/<device>', methods = ['POST', 'GET'])
+@app.route('/devices/<device>', methods = ['GET'])
 def devicesPinWeb(device):
-    data = {}
-    if request.method == 'POST':
-        data = pins.updatePin(device, request.form['pin'], request.form['mode'], request.form['value'])
-        #return data
-
-    else:
+    if conf["IS_SERVER"]:
         data = pins.getPins(device)
-    
-    return render_template('pins.html', pinData = json.loads(data))
+        
+        return render_template('pins.html', pinData = data)
+    else:
+        return abort(403, "This host is not a server.")
+
+@app.route('/devices/<device>', methods = ['POST'])
+def devicesUpdatePins(device):
+    if conf["IS_SERVER"]:
+        dataForm = {'pin': (None, request.form['pin']), 'mode': (None, request.form['mode']), 'value': (None, request.form['value'])}
+        response = requests.post("http://" + device + "/pins/update", files = dataForm)
+        data = json.loads(response.text)
+        pins.updatePins(device, data)
+        
+        return render_template('pins.html', pinData = data)
+    else:
+        return abort(403, "This host is not a server.")
 
 @app.route('/rules', methods = ['GET'])
 def rulesWeb():
@@ -74,21 +107,21 @@ def rulesWeb():
 @app.route('/rules', methods = ['POST'])
 def addDeleteRules():
     if request.form['operand1'] != "":
-        rules.addRule(request.form['operand1'], request.form['operation'], request.form['operand2'], request.form['outputTarget'], request.form['outputValue'])
+        rules.addRule(request.form['ruleId'], request.form['operand1'], request.form['operation'], request.form['operand2'], request.form['outputTarget'], request.form['outputValue'])
     if request.form['deletedRuleId'] != "":
         rules.deleteRule(request.form['deletedRuleId'])
     return render_template('rules.html', rulesData = rules.getRules())
 
 @app.route('/pins/update/<host>', methods = ['POST'])
 def pinUpdateHost(host):
-    #falta registrar los cambios
-    #data = requests.text
-    #print(data)
-    #pins.updatePins(host, requests.text)
     data = json.loads(request.get_json())
     pins.updatePins(host, data)
     
     return {"status": "success"}, 200
+   
+@app.route('/pinsData', methods = ['GET'])
+def pinsData():
+    return pins.getPinData(), 200
 
 # Host
 
@@ -99,10 +132,11 @@ def getMaster():
 @app.route('/master', methods = ['POST'])
 def addMaster():
     master = devices.getMaster()
-    if master == request.host:
+    newMaster = request.form['newMaster']
+    if master == newMaster:
         return {"status": "success"}, 200
     elif master == "":
-        devices.addMaster(request.host)
+        devices.addMaster(newMaster)
         return {"status": "success"}, 201
     else:
         return {"status": "fail"}, 403
@@ -133,9 +167,8 @@ def pinUpdateInputs():
     data = {"status": "success"}
     return data, 200
 
-
 if __name__ == '__main__':
     localPins.loadPinData()
-    timerThread = threading.Thread(target=timer.timer, daemon=True)
+    timerThread = threading.Thread(target=timer.timer, args=(conf["PORT"], conf["TIMER_INTERVAL_SECONDS"]), daemon=True)
     timerThread.start()
     app.run(debug=True, host='0.0.0.0', port=conf["PORT"])    

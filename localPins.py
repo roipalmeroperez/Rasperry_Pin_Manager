@@ -16,18 +16,7 @@ pin_conf = json.loads(pin_conf_file.read())
 localPins = {}
 pwmChannels = {}
 
-def setPWM(pinId, value):
-	global pwmChannels
-	
-	print("Servo modified")
-	if not pinId in pwmChannels.keys():
-		pwmChannels[pinId] = GPIO.PWM(int(pinId), conf["PWM_FREQUENCY_HZ"])
-		pwmChannels[pinId].start(0.0)
-	pwmChannels[pinId].ChangeDutyCycle(value)
-	time.sleep(conf["PWM_SECONDS_DELAY"])
 
-def getPins():
-	return localPins
 
 def loadPinData():
 	global localPins
@@ -41,9 +30,6 @@ def loadPinData():
 	
 	for pinId in loadedPins:
 		updatePin(pinId, loadedPins[pinId]["mode"], loadedPins[pinId]["value"])
-		#print("Id:" + pinId + "; Mode: " + loadedPins[pinId]["mode"] + "; Value: " + str(loadedPins[pinId]["value"]))
-		#print(pinId)
-		#print(data)
 
 def savePinData():
 	global localPins
@@ -51,6 +37,19 @@ def savePinData():
 	f = open("pinData.json", "w")
 	f.write(json.dumps(localPins))
 	f.close()
+
+def setPWM(pinId, value):
+	global pwmChannels
+	
+	print("Servo modified")
+	if not pinId in pwmChannels.keys():
+		pwmChannels[pinId] = GPIO.PWM(int(pinId), conf["PWM_FREQUENCY_HZ"])
+		pwmChannels[pinId].start(0.0)
+	pwmChannels[pinId].ChangeDutyCycle(value)
+	time.sleep(conf["PWM_SECONDS_DELAY"])
+
+def getPins():
+	return localPins
 
 def initPins():
 	global localPins
@@ -134,10 +133,3 @@ def updateInputPins():
 	
 	savePinData()
 	return localPins
-
-if __name__ == '__main__':
-	#initPins()
-	#savePinData()
-	
-	loadPinData()
-

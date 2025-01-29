@@ -24,13 +24,17 @@ def getRules():
     global data
     return data
 
-
-def addRule(operand1, operation, operand2, outputTarget, outputValue):
+def addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue):
     global data
-    ruleId = getRuleId()
+    
     data[ruleId] = {"operand1":operand1, "operation":operation, 
     "operand2":operand2, "outputTarget":outputTarget, 
     "outputValue":outputValue, "ruleValue":False }
+
+"""def addRule(operand1, operation, operand2, outputTarget, outputValue):
+    global data
+    ruleId = getRuleId()
+    addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue)"""
 
 def deleteRule(ruleId):
     global data

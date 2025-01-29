@@ -1,4 +1,4 @@
-import json, time
+import json, time, random
 
 from app import conf as conf
 
@@ -10,6 +10,9 @@ localPins = {}
 def getPins():
 	return localPins
 
+def loadPinData():
+	initPins()
+
 def initPins():
 	global localPins
 	
@@ -19,31 +22,44 @@ def initPins():
 			mode = "Inactive"
 		else:
 			mode = "Disabled"
-		localPins[iStr] = {"mode": mode, "value": "-"}
+		localPins[iStr] = {"mode": mode, "value": ""}
 
 def updatePin(pinId, mode, value):
-	global localPins
+	"""global localPins
 	
 	localPins[pinId]["mode"] = mode
 	localPins[pinId]["value"] = value
 	
-	return localPins
+	return localPins"""
+	global localPins, pwmChannels
+	pin = localPins[pinId]
+	pinNumber = int(pinId)
+	
+	if pin["mode"] == "Disabled":
+		return localPins
+	elif mode in ["Disabled", "Inactive", "Input", "Output", "PWM"]:
+		# set Disabled, Inactive or PWM
+		if mode in ["Disabled", "Inactive", "PWM"]:
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = ""
+		#set Input
+		elif mode == "Input":
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = random.randint(0, 9)
+		#set Output
+		elif mode == "Output":
+			if value in ["On", "Off"]:
+				localPins[pinId]["mode"] = mode
+				localPins[pinId]["value"] = value
+		
+		return localPins
 
 def updateInputPins():
 	global localPins
 	
 	for pinId in localPins:
 		if localPins[pinId]["mode"] == "Input":
-			localPins[pinId]["value"] = "-"
+			localPins[pinId]["value"] = random.randint(0, 9)
 	
 	return localPins
-	
-if __name__ == '__main__':
-	initPins()
-	print(getPins())
-	#localPins["10"]["mode"] = "Input"
-	#localPins["12"]["mode"] = "Input"
-	updateInputPins()
-	print(getPins())
-	
-	
+

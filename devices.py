@@ -17,37 +17,14 @@ def getDevices():
 def addDevice(device):
 	global devicesList
 	
-	if device in devicesList:
-		return 200
-	try:
-		url = "http://" + device + "/master"
-		response = requests.post(url)
-	except:
-		return 404
-	
-	url = "http://" + device + "/pins"
-	response = requests.get(url)
-	pins.addPins(device, response.text)
-	
 	devicesList.append(device)
-	
-	
-	return 201
+	return devicesList
 
 def deleteDevice(device):
 	global devicesList
 	
-	if not(device in devicesList):
-		return 404
-	else:
-		devicesList.remove(device)
-		try:
-			url = "http://" + device + "/master"
-			response = requests.delete(url)
-		except:
-			return 404
-	
-	return 200
+	devicesList.remove(device)
+	return devicesList
 
 def getMaster():
 	global master
