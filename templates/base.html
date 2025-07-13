@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raspberry Pin Manager</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div id="body-header">
+        <h1>Raspberry Pin Manager</h1>
+        <button onclick="window.location.href='/';">
+            Home
+        </button>
+        <button onclick="window.location.href='/devices';">
+            Devices
+        </button>
+        <button onclick="window.location.href='/rules';">
+            Rules
+        </button>
+        <button onclick="window.location.href='/camera';">
+            Take foto
+        </button>
+        
+    </div>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

@@ -11,11 +11,12 @@ from flask import Flask, render_template, abort, request, send_from_directory
 # Configuration
 conf_file = open('./config.json')
 conf = json.loads(conf_file.read())
-app = Flask(__name__)
 
 # Our modules
-import pins, devices, rules, camera, timer
-import localPins
+import pins, devices, rules, utils
+
+app = Flask(__name__)
+ownIp = utils.getIp()
 
 # Server
 
@@ -24,9 +25,6 @@ import localPins
 @app.route('/')
 # This method displays the main website
 def indexWeb():
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     return render_template('base.html')
 
 # Devices
@@ -34,17 +32,11 @@ def indexWeb():
 @app.route('/devices', methods = ['GET'])
 # This method displays the devices website
 def devicesWeb():
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     return render_template('devices.html', devicesData = devices.getDevices())
 
 @app.route('/devices', methods = ['POST'])
 # This method manages the posts launched by the devices website
 def addDeleteDevices():
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     devicesList = devices.getDevices()
     device = request.form['device']
     
@@ -54,13 +46,13 @@ def addDeleteDevices():
         
         else:
             try:
-                url = "http://" + device + "/master"
-                dataForm = {'newMaster': (None, conf["HOST"] + ":" + str(conf["PORT"]))}
+                url = "http://" + device + ":" + str(conf["SLAVE_PORT"]) + "/master"
+                dataForm = {'newMaster': (None, ownIp)}
                 response = requests.post(url, files = dataForm)
             except:
                 return abort(404)
                 
-            url = "http://" + device + "/pins"
+            url = "http://" + device + ":" + str(conf["SLAVE_PORT"]) + "/pins"
             response = requests.get(url)
             data = json.loads(response.text)
             pins.addPins(device, data)
@@ -75,7 +67,7 @@ def addDeleteDevices():
             devicesList = devices.deleteDevice(device)
             pins.deletePins(device)
             try:
-                url = "http://" + device + "/master"
+                url = "http://" + device + ":" + str(conf["SLAVE_PORT"]) + "/master"
                 response = requests.delete(url)
             except:
                 abort(404)
@@ -91,19 +83,13 @@ def addDeleteDevices():
 @app.route('/devices/<device>', methods = ['GET'])
 # This method displays pins of a particular device
 def devicesPinWeb(device):
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-        
     return render_template('pins.html', pinData = pins.getPins(device))
 
 @app.route('/devices/<device>', methods = ['POST'])
 # This method manages the posts launched by the pins website and allows the pin value modification
 def devicesUpdatePins(device):
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     dataForm = {'pin': (None, request.form['pin']), 'mode': (None, request.form['mode']), 'value': (None, request.form['value'])}
-    response = requests.post("http://" + device + "/pins", files = dataForm)
+    response = requests.post("http://" + device + ":" + str(conf["SLAVE_PORT"]) + "/pins", files = dataForm)
     data = json.loads(response.text)
     pins.updatePins(device, data)
     rules.executeRules()
@@ -114,16 +100,10 @@ def devicesUpdatePins(device):
 
 @app.route('/rules', methods = ['GET'])
 def rulesWeb():
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     return render_template('rules.html', rulesData = rules.getRules())
 
 @app.route('/rules', methods = ['POST'])
 def addDeleteRules():
-    if not(conf["IS_SERVER"]):
-        return abort(403, "This host is not a server.")
-    
     if request.form['ruleId'] != "":
         # falta validar los datos
         rules.addRule(request.form['ruleId'], request.form['operand1'], request.form['operation'], request.form['operand2'], request.form['outputTarget'], request.form['outputValue'])
@@ -137,15 +117,11 @@ def addDeleteRules():
 @app.route('/pins/update/<host>', methods = ['POST'])
 def pinUpdateHost(host):
     
-    if conf["IS_SERVER"]:
-        data = json.loads(request.get_json())
-        pins.updatePins(host, data)
-        rules.executeRules()
-        
-        return {"status": "success"}, 200
-    else:
-        return {"status": "fail"}, 403
+    data = json.loads(request.get_json())
+    pins.updatePins(host, data)
+    rules.executeRules()
     
+    return {"status": "success"}, 200
 
 # Data control
 
@@ -153,79 +129,9 @@ def pinUpdateHost(host):
 def pinsData():
     return pins.getPinData(), 200
 
-# Host
-
-# Master manage
-
-@app.route('/master', methods = ['POST'])
-def addMaster():
-    master = devices.getMaster()
-    newMaster = request.form['newMaster']
-    if master == newMaster:
-        return {"status": "success"}, 200
-    elif master == "":
-        devices.addMaster(newMaster)
-        return {"status": "success"}, 201
-    else:
-        return {"status": "fail"}, 403
-
-@app.route('/master', methods = ['DELETE'])
-def deleteMaster():
-    devices.deleteMaster()
-    return {"status": "success"}, 200
-
-# Local pins
-
-@app.route('/pins', methods = ['GET'])
-def pinWeb():
-    return localPins.getPins(), 200
-
-@app.route('/pins', methods = ['POST'])
-def pinUpdate():
-    data = localPins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
-    return data, 200
-
-# Local pins update
-
-@app.route('/updateInputs', methods = ['POST'])
-def pinUpdateInputs():
-    pinData = localPins.updateInputPins()
-    
-    master = devices.getMaster()
-    if master != "":
-        url = "http://" + master + "/pins/update/" + conf["HOST"] + ":" + str(conf["PORT"])
-        requests.post(url, json=json.dumps(pinData))
-    
-    data = {"status": "success"}
-    return data, 200
-
-# Camera
-
-@app.route('/camera', methods = ['GET'])
-def takeFoto():
-    x = datetime.datetime.now()
-    pictureName = x.strftime("%Y") + x.strftime("%m") + x.strftime("%d")
-    pictureName += x.strftime("%H") + x.strftime("%M") + x.strftime("%S")
-    pictureName += '.jpg'
-    
-    camera.takeFoto('./' + conf["PICTURES_ROUTE"], pictureName)
-    
-    return send_from_directory(conf["PICTURES_ROUTE"], pictureName)
-
-# Data control
-
-@app.route('/master', methods = ['GET'])
-def getMaster():
-    return {"master": devices.getMaster()}, 200
-
-
 
 
 # Main program
 
 if __name__ == '__main__':
-    if conf["IS_RASPBERRY"]:
-        localPins.loadPinData()
-        timerThread = threading.Thread(target=timer.timer, args=(conf["PORT"], conf["TIMER_INTERVAL_SECONDS"]), daemon=True)
-        timerThread.start()
-    app.run(debug=True, host='0.0.0.0', port=conf["PORT"])    
+    app.run(debug=True, host='0.0.0.0', port=conf["MANAGER_PORT"])    

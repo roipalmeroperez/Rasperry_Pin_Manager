@@ -1,29 +1,28 @@
-<html>
-   <body>
-      <form action = "http://localhost:8080/devices" method = "post">
-         <table>
-            <tr>
-               <td>New device:</td>
-               <td><select name="method" id="method">
-               <option value="ADD" selected>Add</option>
-               <option value="DELETE">Delete</option>
-            </select></td>
-               <td><input type = "text" name = "device" /></td>
-            </tr>
-            <tr>
-               <td><input type = "submit" /></td>
-            </tr>
-         </table>
-      </form>
-      <table>
-      <tr>
-         <th>Address</th>
-      </tr>
+{% extends "base.html" %}
+
+{% block content %}
+   <div class="grid-container">
+      <div class="grid-item">
+         <button class="btn btn-info" data-toggle="collapse" data-target="#addForm">Añadir device</button>
+            <div id="addForm" class="collapse">
+               <form action = "http://localhost:8080/devices" method = "post">
+                  <label for="device">New device:</label><br>
+                  <input type = "text" name = "device" />
+                  <input type = "hidden" name = "method" value = "ADD"/>
+                  <input type = "submit" /></td>
+               </form>
+            </div>
+      </div>
       {% for device in devicesData %}
-         <tr> 
-            <td><a href="/devices/{{ device }}">{{ device }}</a></td>
-         </tr>
+      <div class="grid-item">
+         <a href="/devices/{{ device }}">{{ device }}</a>
+         <form action = "http://localhost:8080/devices" method = "post">
+            <input type = "hidden" name = "device" value = "{{ device }}" />
+            <input type = "hidden" name = "method" value = "DELETE"/>
+         <input type = "submit" value="Delete"/></td>
+         </form>
+         
+      </div>
       {% endfor %}
-   </table>
-   </body>
-</html>
+   </div>
+{% endblock %}

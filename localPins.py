@@ -2,21 +2,33 @@
 This module contains the code that allows the slave to manage 
 its own pins.
 """
-
+# Imports
 import RPi.GPIO as GPIO
-#import GPIO_mock as GPIO
 import json, time
 import threading
 
+# Import configuration
 from app import conf as conf
-
 pin_conf_file = open('./pin_config.json')
 pin_conf = json.loads(pin_conf_file.read())
 
+# Global variables
 localPins = {}
 pwmChannels = {}
 
 
+# Methods
+def initPins():
+	global localPins
+	GPIO.setmode(GPIO.BOARD)
+	
+	for i in range(1, pin_conf['pinNumber'] + 1):
+		iStr = str(i).zfill(2)
+		if pin_conf[iStr]:
+			mode = "Inactive"
+		else:
+			mode = "Disabled"
+		localPins[iStr] = {"mode": mode, "value": ""}
 
 def loadPinData():
 	global localPins
@@ -51,18 +63,6 @@ def setPWM(pinId, value):
 def getPins():
 	return localPins
 
-def initPins():
-	global localPins
-	GPIO.setmode(GPIO.BOARD)
-	
-	for i in range(1, pin_conf['pinNumber'] + 1):
-		iStr = str(i).zfill(2)
-		if pin_conf[iStr]:
-			mode = "Inactive"
-		else:
-			mode = "Disabled"
-		localPins[iStr] = {"mode": mode, "value": ""}
-
 def updatePin(pinId, mode, value):
 	global localPins, pwmChannels
 	pin = localPins[pinId]
@@ -89,7 +89,7 @@ def updatePin(pinId, mode, value):
 			elif pin["mode"] != "Input":
 				GPIO.setup(pinNumber, GPIO.IN)
 			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = GPIO.input(pinNumber)
+			localPins[pinId]["value"] = str(GPIO.input(pinNumber))
 			savePinData()
 			return localPins
 		#set Output
@@ -129,7 +129,7 @@ def updateInputPins():
 	
 	for pinId in localPins:
 		if localPins[pinId]["mode"] == "Input":
-			localPins[pinId]["value"] = GPIO.input(int(pinId))
+			localPins[pinId]["value"] = str(GPIO.input(int(pinId)))
 	
 	savePinData()
 	return localPins

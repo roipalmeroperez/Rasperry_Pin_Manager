@@ -1,19 +1,6 @@
-<!DOCTYPE html>
-<html>
-   <head>
-      <title>Pins</title>
-      <link rel="stylesheet" href="../static/style.css">
-   </head>
-   
-   <body>
-   <h1>Pins</h1>
-   <button onclick="window.location.href='/';">
-      Home
-   </button>
-   <button onclick="window.location.href='/devices';">
-      Devices
-   </button>
-   
+{% extends "base.html" %}
+
+{% block content %}
    <form action = "" method = "post">
       <table>
          <tr>
@@ -53,6 +40,7 @@
       {% endfor %}
    </table>
    
+{% endblock %}
    <!--
    <address>
    Written by <a href="mailto:webmaster@example.com">Jon Doe</a>.<br>
@@ -62,6 +50,4 @@
    USA
    </address>
    -->
-   </body>
-
-</html>
+   

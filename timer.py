@@ -2,7 +2,7 @@ import time
 import requests
 
 def timer(port, interval):
-	url = "http://localhost:" + str(port) + "/pins/updateInputs"
+	url = "http://localhost:" + str(port) + "/updateInputs"
 	prevTime = int(time.time()) + 1
 	
 	while True:
