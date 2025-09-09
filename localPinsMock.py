@@ -2,7 +2,7 @@ import json, time, random
 
 from app import conf as conf
 
-pin_conf_file = open('./pin_config.json')
+pin_conf_file = open('./localPinsConfig.json')
 pin_conf = json.loads(pin_conf_file.read())
 
 localPins = {}
@@ -10,7 +10,7 @@ localPins = {}
 def getPins():
 	return localPins
 
-def loadPinData():
+def loadData():
 	initPins()
 
 def initPins():
@@ -25,41 +25,39 @@ def initPins():
 		localPins[iStr] = {"mode": mode, "value": ""}
 
 def updatePin(pinId, mode, value):
-	"""global localPins
-	
-	localPins[pinId]["mode"] = mode
-	localPins[pinId]["value"] = value
-	
-	return localPins"""
-	global localPins, pwmChannels
+	global localPins
 	pin = localPins[pinId]
 	pinNumber = int(pinId)
 	
 	if pin["mode"] == "Disabled":
-		return localPins
+		pass
 	elif mode in ["Disabled", "Inactive", "Input", "Output", "PWM"]:
 		# set Disabled, Inactive or PWM
-		if mode in ["Disabled", "Inactive", "PWM"]:
+		if mode in ["Disabled", "Inactive"]:
 			localPins[pinId]["mode"] = mode
 			localPins[pinId]["value"] = ""
 		#set Input
 		elif mode == "Input":
 			localPins[pinId]["mode"] = mode
-			localPins[pinId]["value"] = random.randint(0, 9)
+			localPins[pinId]["value"] = random.randint(0, 2)
 		#set Output
 		elif mode == "Output":
 			if value in ["On", "Off"]:
 				localPins[pinId]["mode"] = mode
 				localPins[pinId]["value"] = value
+		#set PWM
+		elif mode == "PWM":
+			localPins[pinId]["mode"] = mode
+			localPins[pinId]["value"] = value
 		
-		return localPins
+	return localPins
 
 def updateInputPins():
 	global localPins
 	
 	for pinId in localPins:
 		if localPins[pinId]["mode"] == "Input":
-			localPins[pinId]["value"] = random.randint(0, 9)
+			localPins[pinId]["value"] = random.randint(0, 2)
 	
 	return localPins
 

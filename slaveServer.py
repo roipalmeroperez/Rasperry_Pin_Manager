@@ -4,8 +4,7 @@ http petitions.
 """
 
 # External modules
-import json, requests, datetime
-import threading
+import json, requests, threading
 from flask import Flask, render_template, abort, request, send_from_directory
 
 # Our modules
@@ -14,21 +13,17 @@ import localPins, camera, timer, utils
 # Configuration
 conf_file = open('./config.json')
 conf = json.loads(conf_file.read())
+
 app = Flask(__name__)
 master = ""
 ownIp = utils.getIp()
-
-
 
 # Index
 
 @app.route('/')
 # This method displays the main website
 def indexWeb():
-    print(request.remote_addr)
     return render_template('indexSlave.html', pinData = localPins.getPins())
-
-# Host
 
 # Master manage
 
@@ -44,10 +39,10 @@ def addMaster():
     
     newMaster = request.remote_addr
     if master == newMaster:
-        return {"status": "success"}, 200
+        return {"status": "success", "ip": ownIp}, 200
     elif master == "":
         master = newMaster
-        return {"status": "success"}, 201
+        return {"status": "success", "ip": ownIp}, 201
     else:
         return {"status": "fail"}, 403
 
@@ -60,15 +55,13 @@ def deleteMaster():
 # Local pins
 
 @app.route('/pins', methods = ['GET'])
-def pinWeb():
+def pinData():
     return localPins.getPins(), 200
 
 @app.route('/pins', methods = ['POST'])
 def pinUpdate():
     data = localPins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
     return data, 200
-
-# Local pins update
 
 @app.route('/updateInputs', methods = ['POST'])
 def pinUpdateInputs():
@@ -96,7 +89,7 @@ def takeFoto():
 
 if __name__ == '__main__':
     
-    localPins.loadPinData()
+    localPins.loadData()
     timerThread = threading.Thread(target=timer.timer, args=(conf["SLAVE_PORT"], conf["TIMER_INTERVAL_SECONDS"]), daemon=True)
     timerThread.start()
     app.run(debug=True, host='0.0.0.0', port=conf["SLAVE_PORT"])    

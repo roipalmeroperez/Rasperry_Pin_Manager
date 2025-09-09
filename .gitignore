@@ -16,3 +16,4 @@ node_modules
 # Archivos a ignorar
 config.json
 __pycache__
+Pictures/*

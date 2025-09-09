@@ -3,21 +3,15 @@ This module contains the code to handle the rules of the master.
 """
 # Imports
 # import datetime
-import requests
+import requests, json
 import utils, pins
 
-# Import configuration
-from app import conf as conf
-
+# Configuration
+conf_file = open('./config.json')
+conf = json.loads(conf_file.read())
 
 # DAOs
-#ruleDao = __import__(conf["RULE_DAO_NAME"])
-
-# Global variables
-rulesData = {}
-#rulesData["rule1"] = {"operand1":"pinId", "operation":"operation", 
-#"operand2":"value", "outputTarget":"pinId", "outputValue":"value", 
-#"ruleValue":False }
+rulesDao = __import__(conf["RULES_DAO_NAME"])
 
 # Methods
 """def getRuleId():
@@ -27,8 +21,8 @@ rulesData = {}
     return ruleId"""
 
 def isRule(ruleId):
-    global rulesData
-    return ruleId in rulesData
+    rule = rulesDao.getRule(ruleId)
+    return rule == {}
 
 def validateOperand(operand):
     pass
@@ -51,27 +45,19 @@ def getOperandValue(operand):
     return operand
 
 def getRules():
-    global rulesData
-    return rulesData
+    return rulesDao.getRules()
 
 def addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue):
-    global rulesData
     # validación de datos en app.py
-    rulesData[ruleId] = {"operand1":operand1, "operation":operation, 
-    "operand2":operand2, "outputTarget":outputTarget, 
-    "outputValue":outputValue, "ruleValue":False }
+    rulesDao.addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue)
 
 def deleteRule(ruleId):
-    global rulesData
-    rulesData.pop(ruleId)
+    rulesDao.deleteRule(ruleId)
 
-def executeRule(ruleId):
+def executeRule(rule):
     
-    print("Rule " + ruleId + " executed.")
+    print("Rule " + rule["ruleId"] + " executed.")
     #return True
-    
-    global rulesData
-    rule = rulesData[ruleId]
     
     #try:
     """revisar datos de entrada (si son pines, reglas o valores)"""
@@ -107,8 +93,9 @@ def executeRule(ruleId):
     
 
 def executeRules():
-    global rulesData
-    for ruleId in rulesData:
-        executeRule(ruleId)
+    rulesData = rulesDao.getRules()
+    
+    for rule in rulesData.values():
+        executeRule(rule)
 
 

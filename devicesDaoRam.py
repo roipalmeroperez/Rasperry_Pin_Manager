@@ -1,17 +1,27 @@
-devicesList = []
+devicesData = {}
+
+def getDevice(deviceIp):
+	global devicesData
+	return devicesData[deviceIp]
 
 def getDevices():
-	return devicesList
+	global devicesData
+	return devicesData
 
-def existsDevice(device):
-	global devicesList
-	return (device in devicesList)
-		
+def isAddedDevice(deviceIp):
+	global devicesData
+	return (deviceIp in devicesData)
+	
+def addDevice(deviceIp, description, lastUpdate, alive):
+	global devicesData
+	devicesData[deviceIp] = {"deviceIp": deviceIp, "description": description,
+	"lastUpdate": lastUpdate, "alive": alive }
 
-def addDevice(device):
-	global devicesList
-	devicesList.append(device)
+def updateDevice(deviceIp, description, lastUpdate, alive):
+	global devicesData
+	devicesData[device["deviceIp"]] = {"deviceIp": deviceIp, "description": description,
+	"lastUpdate": lastUpdate, "alive": alive }
 
-def removeDevice(device):
-	global devicesList
-	devicesList.remove(device)
+def deleteDevice(deviceIp):
+	global devicesData
+	devicesData.pop(deviceIp)

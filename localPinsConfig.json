@@ -1,5 +1,7 @@
 {
 	"mode": "board", "pinNumber": 40,
+	"PWM_FREQUENCY_HZ": 50,
+	"PWM_SECONDS_DELAY": 0.2,
 	"01": false, "02": false, "03": true, "04": false, "05": true,
 	"06": false, "07": true,  "08": true, "09": false, "10": true,
 	"11": true,  "12": true,  "13": true, "14": false, "15": true,

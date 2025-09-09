@@ -1,7 +1,8 @@
-import socket, datetime
+import socket, datetime, mysql.connector
 
 def validatePin(): 
     pass
+
 def isBool(txt):
     if txt.lower() == "true":
         return (True, True)
