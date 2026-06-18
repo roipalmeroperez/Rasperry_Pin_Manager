@@ -1,11 +1,14 @@
-import picamera
+# Imports
+import utils
 
+# Configuration
+conf = utils.getGeneralConfiguration()
+
+# Implementation
+cameraImpl = __import__(conf["CAMERA_IMPL_NAME"])
 
 def takeFoto(route, name):
-	camera = picamera.PiCamera()
-	camera.resolution = (1024, 768)
-	camera.capture('' + route + name)
-	camera.close()
+	cameraImpl.takeFoto(route, name)
 
 if __name__ == '__main__':
 	takeFoto('./', 'foto.jpg')

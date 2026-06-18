@@ -15,9 +15,12 @@ def getPins(host):
 	global pinList
 	return pinList[host]
 
-def getPin(host, pin):
+def isPin(host, number):
 	global pinList
-	return pinList[host][pin]
+	if host in pinList:
+		return number in pinList[host]
+	else:
+		return False
 
 def addPins(host, pinData):
 	global pinList
@@ -26,13 +29,6 @@ def addPins(host, pinData):
 def deletePins(host):
 	global pinList
 	pinList.pop(host)
-
-def update(host, pinId, mode, value):
-	global pinList
-	pinList[host][pinId] = {
-		"mode": mode,
-		"value": value
-		}
 
 def updatePins(host, pinData):
 	global pinList

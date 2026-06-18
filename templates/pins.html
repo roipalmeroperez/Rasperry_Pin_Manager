@@ -5,11 +5,13 @@
       <table>
          <tr>
             <td>Pin:</td>
+            <td>Description:</td>
             <td>Mode:</td>
             <td>Value:</td>
          </tr>
          <tr>
             <td><input name = "pin"/></td>
+            <td><input name = "description"/></td>
             <td><select name="mode" id="mode">
                <option value="Disabled">Disabled</option>
                <option value="Inactive" selected>Inactive</option>
@@ -29,11 +31,12 @@
 
    <table>
       <tr>
-         <th>Pin</th><th>Mode</th><th>Value</th>
+         <th>Pin</th><th>Description</th><th>Mode</th><th>Value</th>
       </tr>
       {% for key, value in pinData.items() %}
          <tr> 
             <td>{{ key }}</td>
+            <td>{{ value.description }}</td>
             <td>{{ value.mode }}</td>
             <td>{{ value.value }}</td>
          </tr>

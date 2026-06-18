@@ -21,8 +21,7 @@ rulesDao = __import__(conf["RULES_DAO_NAME"])
     return ruleId"""
 
 def isRule(ruleId):
-    rule = rulesDao.getRule(ruleId)
-    return rule == {}
+    return rulesDao.isRule(ruleId)
 
 def validateOperand(operand):
     pass
@@ -50,14 +49,19 @@ def getRules():
 def addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue):
     # validación de datos en app.py
     rulesDao.addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue)
+    return 201
 
 def deleteRule(ruleId):
-    rulesDao.deleteRule(ruleId)
+    if isRule(ruleId):
+        rulesDao.deleteRule(ruleId)
+        return 200
+    else:
+        return 404
 
 def executeRule(rule):
     
     print("Rule " + rule["ruleId"] + " executed.")
-    #return True
+    return True
     
     #try:
     """revisar datos de entrada (si son pines, reglas o valores)"""

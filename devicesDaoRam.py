@@ -1,12 +1,12 @@
 devicesData = {}
 
-def getDevice(deviceIp):
-	global devicesData
-	return devicesData[deviceIp]
-
 def getDevices():
 	global devicesData
 	return devicesData
+
+def getDevice(deviceIp):
+	global devicesData
+	return devicesData[deviceIp]
 
 def isAddedDevice(deviceIp):
 	global devicesData
@@ -19,7 +19,7 @@ def addDevice(deviceIp, description, lastUpdate, alive):
 
 def updateDevice(deviceIp, description, lastUpdate, alive):
 	global devicesData
-	devicesData[device["deviceIp"]] = {"deviceIp": deviceIp, "description": description,
+	devicesData[deviceIp] = {"deviceIp": deviceIp, "description": description,
 	"lastUpdate": lastUpdate, "alive": alive }
 
 def deleteDevice(deviceIp):

@@ -3,25 +3,24 @@ This module contains the code that allows the slave to manage
 its own pins.
 """
 # External modules
-import json
+import json, utils
 
 # Configuration
-conf_file = open('./config.json')
-conf = json.loads(conf_file.read())
+conf = utils.getGeneralConfiguration()
 
 # Dinamic modules
 localPinsImpl = __import__(conf["LOCAL_PINS_IMPL_NAME"])
 
 # Methods
 
-def loadData():
+def loadPins():
 	localPinsImpl.loadData()
 
 def getPins():
 	return localPinsImpl.getPins()
 
-def updatePin(pinId, mode, value):
-	return localPinsImpl.updatePin(pinId, mode, value)
+def updatePin(pinId, description, mode, value):
+	return localPinsImpl.updatePin(pinId, description, mode, value)
 
 def updateInputPins():
 	return localPinsImpl.updateInputPins()

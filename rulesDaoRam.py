@@ -3,17 +3,22 @@ This module contains the code to handle the rules of the master.
 """
 
 # Global variables
+
 rulesData = {}
 
 # Methods
+
+def getRules():
+    global rulesData
+    return rulesData
 
 def getRule(ruleId):
     global rulesData
     return rulesData[ruleId]
 
-def getRules():
+def isRule(ruleId):
     global rulesData
-    return rulesData
+    return ruleId in rulesData
 
 def addRule(ruleId, operand1, operation, operand2, outputTarget, outputValue):
     global rulesData

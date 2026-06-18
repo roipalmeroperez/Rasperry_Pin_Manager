@@ -3,11 +3,10 @@ This module contains the code that allows the master to manage
 the slave pins.
 """
 # Imports
-import json
+import utils
 
 # Configuration
-conf_file = open('./config.json')
-conf = json.loads(conf_file.read())
+conf = utils.getGeneralConfiguration()
 
 # DAOs
 pinsDao = __import__(conf["PINS_DAO_NAME"])
@@ -19,14 +18,11 @@ def getPinData():
 def getPins(host):
     return pinsDao.getPins(host)
 
-def getPin(host, pin):
-    return pinsDao.getPin(host, pin)
+def isPin(host, number):
+    return pinsDao.isPin(host, number)
     
 def addPins(host, pinData):
     pinsDao.addPins(host, pinData)
-
-def updatePin(host, pinId, mode, value):
-    pinsDao.update(host, pinId, mode, value)
 
 def updatePins(host, pinData):
     pinsDao.updatePins(host, pinData)

@@ -4,47 +4,47 @@ the slaves and the slave to identify its master.
 """
 
 # Imports
-import json, datetime, requests, socket
+import json, requests
 import utils, pins
 
 # Configuration
-conf_file = open('./config.json')
-conf = json.loads(conf_file.read())
+conf = utils.getGeneralConfiguration()
 
 # DAOs
 devicesDao = __import__(conf["DEVICES_DAO_NAME"])
 
 # Methods
-
-# Global variables
-devicesList = []
-
-# Methods
 def getDevices():
 	return devicesDao.getDevices()
 
+def getDevice(deviceIp):
+	return devicesDao.getDevice(deviceIp)
+
+def isAddedDevice(deviceIp):
+	return devicesDao.isAddedDevice(deviceIp)
+
 def addDevice(deviceIp, description):
-	if devicesDao.isAddedDevice(deviceIp):
+	if isAddedDevice(deviceIp):
 		return 200
 	
 	else:
-		#try:
+		try:
 			url = "http://" + deviceIp + ":" + str(conf["SLAVE_PORT"]) + "/master"
 			response = requests.post(url)
 			deviceIp = json.loads(response.text)["ip"]
 			url = "http://" + deviceIp + ":" + str(conf["SLAVE_PORT"]) + "/pins"
 			response = requests.get(url)
 			data = json.loads(response.text)
-			lastUpdate = datetime.datetime.now()
+			lastUpdate = utils.getDate()
 			alive = True
 			devicesDao.addDevice(deviceIp, description, lastUpdate, alive)
 			pins.addPins(deviceIp, data)
 			return 201
-		#except:
-			#return 404
+		except:
+			return 404
 
 def deleteDevice(deviceIp):
-	if not devicesDao.isAddedDevice(deviceIp):
+	if not isAddedDevice(deviceIp):
 		return 404
 	
 	else:
@@ -58,4 +58,8 @@ def deleteDevice(deviceIp):
 			return 404
 
 def updateDevice(deviceIp, description, lastUpdate, alive):
-	pass
+	if isAddedDevice(deviceIp):
+		devicesDao.updateDevice(deviceIp, description, lastUpdate, alive)
+		return 200
+	else:
+		return 404

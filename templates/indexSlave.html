@@ -14,11 +14,12 @@
        <div id="content">
               <table>
                      <tr>
-                     <th>Pin</th><th>Mode</th><th>Value</th>
+                     <th>Pin</th><th>Description</th><th>Mode</th><th>Value</th>
                      </tr>
                      {% for key, value in pinData.items() %}
                      <tr> 
                      <td>{{ key }}</td>
+                     <td>{{ value.description }}</td>
                      <td>{{ value.mode }}</td>
                      <td>{{ value.value }}</td>
                      </tr>

@@ -5,14 +5,13 @@ http petitions.
 
 # External modules
 import json, requests, threading
-from flask import Flask, render_template, abort, request, send_from_directory
+from flask import Flask, render_template, abort, request, send_from_directory, send_file
 
 # Our modules
-import localPins, camera, timer, utils
+import localPins, camera, utils
 
 # Configuration
-conf_file = open('./config.json')
-conf = json.loads(conf_file.read())
+conf = utils.getGeneralConfiguration()
 
 app = Flask(__name__)
 master = ""
@@ -52,6 +51,12 @@ def deleteMaster():
     master = ""
     return {"status": "success"}, 200
 
+# Devices
+
+@app.route('/alive', methods = ['GET'])
+def devicesAlive():
+    return {"status": "success"}, 200
+
 # Local pins
 
 @app.route('/pins', methods = ['GET'])
@@ -60,8 +65,13 @@ def pinData():
 
 @app.route('/pins', methods = ['POST'])
 def pinUpdate():
-    data = localPins.updatePin(request.form['pin'], request.form['mode'], request.form['value'])
-    return data, 200
+    global master
+    origin = request.remote_addr
+    if origin == master:
+        data = localPins.updatePin(request.form['pin'], request.form['description'], request.form['mode'], request.form['value'])
+        return data, 200
+    else:
+        return abort(403)
 
 @app.route('/updateInputs', methods = ['POST'])
 def pinUpdateInputs():
@@ -72,8 +82,7 @@ def pinUpdateInputs():
         url = "http://" + master + ":" + str(conf["MANAGER_PORT"]) + "/pins/update/" + ownIp
         requests.post(url, json=json.dumps(pinData))
     
-    data = {"status": "success"}
-    return data, 200
+    return {"status": "success"}, 200
 
 # Camera
 
@@ -82,14 +91,15 @@ def takeFoto():
     pictureName = utils.getDateStr() + '.jpg'
     camera.takeFoto('./' + conf["PICTURES_ROUTE"], pictureName)
     
-    return send_from_directory(conf["PICTURES_ROUTE"], pictureName)
+    return send_file('./' + conf["PICTURES_ROUTE"] + pictureName, mimetype='image/jpg')
 
 
 # Main program
 
 if __name__ == '__main__':
     
-    localPins.loadData()
-    timerThread = threading.Thread(target=timer.timer, args=(conf["SLAVE_PORT"], conf["TIMER_INTERVAL_SECONDS"]), daemon=True)
-    timerThread.start()
+    localPins.loadPins()
+    url = "http://localhost:" + str(conf["SLAVE_PORT"]) + "/updateInputs"
+    inputUpdaterThread = threading.Thread(target=utils.timer, args=(url, conf["INPUT_INTERVAL_SECONDS"]), daemon=True)
+    inputUpdaterThread.start()
     app.run(debug=True, host='0.0.0.0', port=conf["SLAVE_PORT"])    

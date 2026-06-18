@@ -1,39 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-   <form action = "http://localhost:8080/rules" method = "post">
-      <table>
-         <tr>
-            <td>Rule Id:</td>
-            <td>Operand 1:</td>
-            <td>Operation:</td>
-            <td>Operand 2:</td>
-            <td>Output Target:</td>
-            <td>Output Value:</td>
-         </tr>
-         <tr>
-            <td><input type = "text" name = "ruleId" /></td>
-            <td><input type = "text" name = "operand1" /></td>
-            <td><select name="operation" id="operation">
-               <option value="greater than">greater than</option>
-               <option value="less than">less than</option>
-               <option value="equals">equals</option>
-               <option value="not equals">not equals</option>
-            </select></td>
-            <td><input type = "text" name = "operand2" /></td>
-            <td><input type = "text" name = "outputTarget" /></td>
-            <td><input type = "text" name = "outputValue" /></td>
-         </tr>
-      </table>
-      <table>
-         <tr>
-            <td>Delete rule:</td>
-            <td><input type = "text" name = "deletedRuleId" /></td>
-         <tr>
-      </table>
-      <input type = "submit" />
-      
-   </form>
+   <button class="btn btn-info" data-toggle="collapse" data-target="#addForm">Añadir regla</button>
+            <div id="addForm" class="collapse">
+               <form action = "/rules" method = "post">
+                  <table>
+                     <tr><td>Rule Id:</td><td><input type = "text" name = "ruleId" /></td></tr>
+                     <tr><td>Operand 1:</td><td><input type = "text" name = "operand1" /></td></tr>
+                     <tr><td>Operation:</td><td><select name="operation" id="operation">
+                           <option value="greater than">greater than</option>
+                           <option value="less than">less than</option>
+                           <option value="equals">equals</option>
+                           <option value="not equals">not equals</option>
+                        </select></td></tr>
+                     <tr><td>Operand 2:</td><td><input type = "text" name = "operand2" /></td></tr>
+                     <tr><td>Output Target:</td><td><input type = "text" name = "outputTarget" /></td></tr>
+                     <tr><td>Output Value:</td><td><input type = "text" name = "outputValue" /></td></tr>
+                  </table>
+                  <input type = "hidden" name = "method" value = "ADD"/>
+                  <input type = "submit" /></td>
+               </form>
+            </div>
+   
    
    <table>
    <tr>
@@ -48,6 +36,11 @@
          <td>{{ value.outputTarget }}</td>
          <td>{{ value.outputValue }}</td>
          <td>{{ value.ruleValue }}</td>
+         <td><form action = "/rules" method = "post">
+            <input type = "hidden" name = "ruleId" value = "{{ key }}" />
+            <input type = "hidden" name = "method" value = "DELETE"/>
+         <input type = "submit" value="Delete"/></td>
+         </form></td>
       </tr>
    {% endfor %}
    </table>

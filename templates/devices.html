@@ -5,7 +5,7 @@
       <div class="grid-item">
          <button class="btn btn-info" data-toggle="collapse" data-target="#addForm">Añadir device</button>
             <div id="addForm" class="collapse">
-               <form action = "http://localhost:8080/devices" method = "post">
+               <form action = "/devices" method = "post">
                   <label for="device">New device:</label><br>
                   <input type = "text" name = "device" /><br>
                   <label for="description">Description:</label><br>
@@ -19,7 +19,12 @@
       <div class="grid-item">
          <a href="/devices/{{ value.deviceIp }}">{{ value.deviceIp }}</a>
          <p>Description: {{ value.description }}</p>
-         <form action = "http://localhost:8080/devices" method = "post">
+         <p>Last update: {{ value.lastUpdate }}</p>
+         <p>Is alive: {{ value.alive }}</p>
+         <form action = "/devices/{{ value.deviceIp }}/takeFoto" method = "get">
+         <input type = "submit" value="Take Foto"/></td>
+         </form>
+         <form action = "/devices" method = "post">
             <input type = "hidden" name = "device" value = "{{ value.deviceIp }}" />
             <input type = "hidden" name = "method" value = "DELETE"/>
          <input type = "submit" value="Delete"/></td>
